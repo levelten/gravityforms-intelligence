@@ -1,0 +1,6 @@
+/* placeholder for css */
+
+#gform-settings #gaddon-setting-row-mappedProperties td {
+    max-height: 120px;
+    overflow-y: auto;
+}

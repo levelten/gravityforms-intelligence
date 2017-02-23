@@ -379,8 +379,7 @@ class GFIntelAddOn extends GFAddOn {
 		if (isset($form['gravityformsintel']) && is_array($form['gravityformsintel'])) {
 			foreach ($form['gravityformsintel'] as $k => $v) {
 				if (!empty($v) && (strpos($k, 'field_map') === 0)) {
-					$propKey = str_replace('field_map', '', $k);
-					$propKey = str_replace('__', ':', $propKey);
+					$propKey = str_replace('field_map_', '', $k);
 					$propKey = str_replace('_', '.', $propKey);
 					$postKey = 'input_' . str_replace('.', '_', $v);
 					if (isset($_POST[$postKey])) {
@@ -396,6 +395,10 @@ class GFIntelAddOn extends GFAddOn {
 				$props['data.name'] .= ' ' . $props['data.familyName'];
 			}
 		}
+
+		Intel_Df::watchdog('gfi_pre_submission form', print_r($form, 1));
+		Intel_Df::watchdog('gfi_pre_submission post', print_r($_POST, 1));
+		Intel_Df::watchdog('gfi_pre_submission subProps', print_r($props, 1));
 
 		$this->submissionProps = $props;
 	}

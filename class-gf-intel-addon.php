@@ -47,7 +47,10 @@ class GFIntelAddOn extends GFAddOn {
 	}
 
 	public function hook_gform_entry_detail_content($form, $entry ) {
-		wp_enqueue_style('intel_admin_css', INTEL_URL . 'admin/css/intel-admin.css');
+		// enueue admin styling & scripts
+		intel()->admin->enqueue_styles();
+		intel()->admin->enqueue_scripts();
+
 		$vars = array(
 			'type' => 'gravityform',
 			'fid' => $entry['form_id'],
@@ -396,9 +399,9 @@ class GFIntelAddOn extends GFAddOn {
 			}
 		}
 
-		Intel_Df::watchdog('gfi_pre_submission form', print_r($form, 1));
-		Intel_Df::watchdog('gfi_pre_submission post', print_r($_POST, 1));
-		Intel_Df::watchdog('gfi_pre_submission subProps', print_r($props, 1));
+		//Intel_Df::watchdog('gfi_pre_submission form', print_r($form, 1));
+		//Intel_Df::watchdog('gfi_pre_submission post', print_r($_POST, 1));
+		//Intel_Df::watchdog('gfi_pre_submission subProps', print_r($props, 1));
 
 		$this->submissionProps = $props;
 	}

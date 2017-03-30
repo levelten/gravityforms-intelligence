@@ -319,7 +319,7 @@ class GFIntelAddOn extends GFAddOn {
 	}
 
 	/**
-	 * Return an array of MailChimp list fields which can be mapped to the Form fields/entry meta.
+	 * Return an array of Intelligence list fields which can be mapped to the Form fields/entry meta.
 	 *
 	 * @return array
 	 */
@@ -389,13 +389,6 @@ class GFIntelAddOn extends GFAddOn {
 						$props[$propKey] = $_POST[$postKey];
 					}
 				}
-			}
-		}
-
-		if (empty($props['data.name']) && !empty($props['data.givenName'])) {
-			$props['data.name'] = $props['data.givenName'];
-			if (!empty($props['data.familyName'])) {
-				$props['data.name'] .= ' ' . $props['data.familyName'];
 			}
 		}
 

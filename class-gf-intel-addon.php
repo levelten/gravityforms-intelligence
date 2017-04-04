@@ -225,9 +225,18 @@ class GFIntelAddOn extends GFAddOn {
 
 		//$intel_events = intel_get_intel_event_info();
 
+		$eg_labels = gf_intel_intl_eventgoal_labels();
+
 		$submission_goals = intel_get_event_goal_info('submission');
 
 		$options = array();
+		foreach ($eg_labels as $k => $v) {
+			$options[] = array(
+				'label' => $v,
+				'value' => $k,
+			);
+		}
+		/*
 		$options[] = array(
 			'label' => esc_html__( '-- None --', 'gravityformsintel' ),
 			'value' => '',
@@ -247,6 +256,7 @@ class GFIntelAddOn extends GFAddOn {
 				'value' => $key,
 			);
 		}
+		*/
 
 		$ret[] = array(
 			'title'       => esc_html__( 'Intelligence Settings', 'gravityformsintel' ),

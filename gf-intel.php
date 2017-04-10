@@ -63,6 +63,7 @@ function gf_intel_url_urn_resovler($vars) {
       if ($urn_elms[1] == 'gravityform' && !empty($urn_elms[2])) {
         $vars['path'] = 'wp-admin/admin.php';
         $vars['options']['query']['page'] = 'gf_edit_forms';
+        $vars['options']['query']['view'] = 'entry';
         $vars['options']['query']['id'] = $urn_elms[2];
         // if 3rd element set, urn specifies an form entry. If only 2, then a
         // form.

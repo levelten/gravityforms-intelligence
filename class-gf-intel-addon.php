@@ -57,13 +57,49 @@ class GFIntelAddOn extends GFAddOn {
 			'fsid' => $entry['id'],
 		);
 		$submission = intel()->get_entity_controller('intel_submission')->loadByVars($vars);
+		if (empty($submission)) {
+			return;
+		}
 		$submission = array_shift($submission);
-		$s = $submission->getSynced();
+		if (empty($submission->vid)) {
+			return;
+		}
+		$synced = $submission->getSynced();
+
+		// if analytics data not stored, sync data
 		if (!$submission->getSynced()) {
 			$submission->syncData();
 		}
+		// check if data only paritially updated
+		else if (empty($submission->data['analytics_session']) || empty($submission->data['analytics_session']['steps'])) {
+			$submission->syncData();
+		}
+		// if we done have the analytics cronology (steps), don't return data.
+		if (empty($submission->data['analytics_session']['steps'])) {
+			return;
+		}
+		// check if enough time has passed since lasthit and the synced time to make
+		// sure all GA data was fetched
+
+		// only do check if time is greater than 60 secs since synced time.
+		if ((time() - $synced) > 60 ) {
+			$lasthit = 0;
+			foreach ($submission->data['analytics_session']['steps'] as $step) {
+				if ($step['time'] > $lasthit) {
+					$lasthit = $step['time'];
+				}
+			}
+			if (($synced - $lasthit) < 1800) {
+				$submission->syncData();
+				$synced = $submission->getSynced();
+			}
+		}
+
 		$submission->build_content($submission);
 		$visitor = intel()->get_entity_controller('intel_visitor')->loadOne($submission->vid);
+		if (empty($visitor->vid)) {
+			return;
+		}
 		$visitor->build_content($visitor);
 
 		//d($visitor->content);
@@ -82,24 +118,23 @@ class GFIntelAddOn extends GFAddOn {
 		$steps_table = Intel_Df::theme('intel_visit_steps_table', array('steps' => $submission->data['analytics_session']['steps']));
 		?>
 		<div id="normal-sortables" class="meta-box-sortables ui-sortable"><div id="notes" class="postbox ">
-				<button type="button" class="handlediv button-link" aria-expanded="true"><span class="screen-reader-text">Toggle panel: Notes</span><span class="toggle-indicator" aria-hidden="true"></span></button><h2 class="hndle ui-sortable-handle"><span>Intelligence</span></h2>
-				<div class="inside bootstrap-wrapper intel-wrapper">
-					<div class="intel-content half">
-						<h4 class="card-header"><?php print __('Submitter profile', 'gravityformsintel'); ?></h4>
-						<?php print $output; ?>
-						<!-- <h4 class="card-header"><?php print __('Analytics', 'gravityformsintel'); ?></h4> -->
-						<div class="card-deck-wrapper m-b-1">
-							<div class="card-deck">
-									<?php print Intel_Df::theme('intel_trafficsource_block', array('trafficsource' => $submission->data['analytics_session']['trafficsource'])); ?>
-									<?php print Intel_Df::theme('intel_location_block', array('entity' => $submission)); ?>
-									<?php print Intel_Df::theme('intel_browser_environment_block', array('entity' => $submission)); ?>
-							</div>
+			<button type="button" class="handlediv button-link" aria-expanded="true"><span class="screen-reader-text">Toggle panel: Notes</span><span class="toggle-indicator" aria-hidden="true"></span></button><h2 class="hndle ui-sortable-handle"><span>Intelligence</span></h2>
+			<div class="inside bootstrap-wrapper intel-wrapper">
+				<div class="intel-content half">
+					<h4 class="card-header"><?php print __('Submitter profile', 'gravityformsintel'); ?></h4>
+					<?php print $output; ?>
+					<!-- <h4 class="card-header"><?php print __('Analytics', 'gravityformsintel'); ?></h4> -->
+					<div class="card-deck-wrapper m-b-1">
+						<div class="card-deck">
+							<?php print Intel_Df::theme('intel_trafficsource_block', array('trafficsource' => $submission->data['analytics_session']['trafficsource'])); ?>
+							<?php print Intel_Df::theme('intel_location_block', array('entity' => $submission)); ?>
+							<?php print Intel_Df::theme('intel_browser_environment_block', array('entity' => $submission)); ?>
 						</div>
-						<?php print Intel_Df::theme('intel_visitor_profile_block', array('title' => __('Visit chronology', 'gravityformsintel'), 'markup' => $steps_table, 'no_margin' => 1)); ?>
 					</div>
+					<?php print Intel_Df::theme('intel_visitor_profile_block', array('title' => __('Visit chronology', 'gravityformsintel'), 'markup' => $steps_table, 'no_margin' => 1)); ?>
 				</div>
 			</div>
-		</div>
+		</div></div>
 		<?php
 	}
 
@@ -112,6 +147,9 @@ class GFIntelAddOn extends GFAddOn {
 		$submission = intel()->get_entity_controller('intel_submission')->loadByVars($vars);
 		$submission = array_shift($submission);
 		$visitor = intel()->get_entity_controller('intel_visitor')->loadOne($submission->vid);
+		if (empty($visitor)) {
+			return;
+		}
 		?>
 		<?php esc_html_e( 'Contact', 'gravityformsintel' ); ?>:
 		<?php print Intel_Df::l($visitor->name(), $visitor->uri()); ?>

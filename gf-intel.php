@@ -1,14 +1,36 @@
 <?php
 /*
-Plugin Name: Gravity Forms Intelligence Add-On
-Plugin URI: http://www.gravityforms.com
-Description: An intelligent add-on to demonstrate the use of the Add-On Framework
-Version: 2.1
-Author: LevelTen
-Author URI: http://getlevelten.com
+* Gravity Forms Intelligence bootstrap file
+*
+* This file is read by WordPress to generate the plugin information in the plugin
+* admin area. This file also includes all of the dependencies used by the plugin,
+* registers the activation and deactivation functions, and defines a function
+* that starts the plugin.
+*
+* @link              getlevelten.com/blog/tom
+* @since             1.0.0
+* @package           Intelligence
+*
+* @wordpress-plugin
+* Plugin Name:       Gravity Forms Intelligence
+* Plugin URI:        http://intelligencewp.com/plugin/gravityforms-intelligence/
+* Description:       Integrates Intelligence with Gravity Forms enabling easy Google Analytics goal tracking and visitor intelligence gathering.
+* Version:           1.0.0
+* Author:            Tom McCracken
+* Author URI:        getlevelten.com/blog/tom
+* License:           GPL-2.0+
+* License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
+* Text Domain:       gf_intel
+* Domain Path:       /languages
+* GitHub Plugin URI: https://github.com/levelten/gravityforms-intelligence
 */
 
-define( 'GF_INTEL_ADDON_VERSION', '2.1' );
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+  die;
+}
+
+define('GF_INTEL_VER', '1.0.0');
 
 add_action( 'gform_loaded', array( 'GF_Intel_AddOn_Bootstrap', 'load' ), 5 );
 
@@ -37,9 +59,9 @@ function gf_intel_intl_eventgoal_labels() {
 
   $data = array();
 
-  $data[''] = '-- ' . esc_html__( 'None', 'gravityformsintel' ) . ' --';
-  $data['form_submission-'] = esc_html__( 'Event: Form submission', 'gravityformsintel' );
-  $data['form_submission'] = esc_html__( 'Valued event: Form submission!', 'gravityformsintel' );
+  $data[''] = '-- ' . esc_html__( 'None', 'gf_intel' ) . ' --';
+  $data['form_submission-'] = esc_html__( 'Event: Form submission', 'gf_intel' );
+  $data['form_submission'] = esc_html__( 'Valued event: Form submission!', 'gf_intel' );
 
 
   foreach ($submission_goals AS $key => $goal) {
@@ -88,6 +110,7 @@ function gf_intel_test_url_parsing_alter($urls) {
     return $urls;
 }
 
+/*
 add_filter('intel_plugin_path_info', 'gf_intel_plugin_path_info');
 function gf_intel_plugin_path_info($info) {
   $info['gravityforms'] = array(
@@ -109,6 +132,7 @@ function gf_intel_plugin_path_info($info) {
   );
   return $info;
 }
+*/
 
 add_filter('intel_form_type_forms_info', 'gf_intel_form_type_forms_info');
 function gf_intel_form_type_forms_info($info) {
@@ -125,14 +149,14 @@ function gf_intel_form_type_form_setup($data, $info) {
   }
   $data['id'] = $info->id;
   $data['title'] = $form_meta['title'];
-  if (!empty($form_meta['gravityformsintel'])) {
-    if (!empty($form_meta['gravityformsintel']['trackingEventName'])) {
+  if (!empty($form_meta['gf_intel'])) {
+    if (!empty($form_meta['gf_intel']['trackingEventName'])) {
       $labels = gf_intel_intl_eventgoal_labels();
-      $data['tracking_event'] = !empty($labels[$form_meta['gravityformsintel']['trackingEventName']]) ? $labels[$form_meta['gravityformsintel']['trackingEventName']] : $form_meta['gravityformsintel']['trackingEventName'];
+      $data['tracking_event'] = !empty($labels[$form_meta['gf_intel']['trackingEventName']]) ? $labels[$form_meta['gf_intel']['trackingEventName']] : $form_meta['gf_intel']['trackingEventName'];
     }
 
     $data['field_map'] = array();
-    foreach ($form_meta['gravityformsintel'] as $k => $v) {
+    foreach ($form_meta['gf_intel'] as $k => $v) {
       if (!empty($v) && (strpos($k, 'field_map') === 0)) {
         $propKey = str_replace('field_map_', '', $k);
         $propKey = str_replace('_', '.', $propKey);
@@ -144,7 +168,49 @@ function gf_intel_form_type_form_setup($data, $info) {
     }
   }
 
-  $data['settings_url'] = '/wp-admin/admin.php?page=gf_edit_forms&view=settings&subview=gravityformsintel&id=' . $info->id;
+  $data['settings_url'] = '/wp-admin/admin.php?page=gf_edit_forms&view=settings&subview=gf_intel&id=' . $info->id;
 
   return $data;
+}
+
+// dependencies notices
+add_action( 'admin_notices', 'gf_intel_plugin_dependency_notice' );
+function gf_intel_plugin_dependency_notice() {
+  global $pagenow;
+
+  if ( 'plugins.php' != $pagenow ) {
+    return;
+  }
+
+  // check dependencies
+  if (!function_exists('intel_is_plugin_active')) {
+    echo gf_intel_error_msg_missing_intel(array('notice' => 1));
+    return;
+  }
+
+  if (!intel_is_plugin_active('gravityforms')) {
+    echo '<div class="error">';
+    echo '<p>';
+    echo '<strong>' . __('Notice:') . '</strong> ';
+    _e('The Gravity Forms Intelligence plugin requires the Gravity Forms plugin to be installed and active.');
+    echo '</p>';
+    echo '</div>';
+    return;
+  }
+}
+
+function gf_intel_error_msg_missing_intel($options = array()) {
+  $msg = '';
+
+  if (!empty($options['notice'])) {
+    $msg .=  '<div class="error">';
+  }
+  $msg .=  '<p>';
+  $msg .=  '<strong>' . __('Notice:') . '</strong> ';
+  $msg .=  __('The Gravity Forms Intelligence plugin requires the Intelligence plugin to be installed and active.');
+  $msg .=  '</p>';
+  if (!empty($options['notice'])) {
+    $msg .=  '</div>';
+  }
+  return $msg;
 }

@@ -4,10 +4,10 @@ GFForms::include_addon_framework();
 
 class GFIntelAddOn extends GFAddOn {
 
-	protected $_version = GF_INTEL_ADDON_VERSION;
+	protected $_version = GF_INTEL_VER;
 	protected $_min_gravityforms_version = '1.9';
-	protected $_slug = 'gravityformsintel';
-	protected $_path = 'gravityformsintel/gf-intel.php';
+	protected $_slug = 'gf_intel';
+	protected $_path = 'gravityforms-intelligence/gf-intel.php';
 	protected $_full_path = __FILE__;
 	protected $_title = 'Gravity Forms Intelligence Add-On';
 	protected $_short_title = 'Intelligence';
@@ -47,6 +47,10 @@ class GFIntelAddOn extends GFAddOn {
 	}
 
 	public function hook_gform_entry_detail_content($form, $entry ) {
+		if (!defined('INTEL_VER')) {
+			return;
+		}
+
 		// enueue admin styling & scripts
 		intel()->admin->enqueue_styles();
 		intel()->admin->enqueue_scripts();
@@ -121,9 +125,9 @@ class GFIntelAddOn extends GFAddOn {
 			<button type="button" class="handlediv button-link" aria-expanded="true"><span class="screen-reader-text">Toggle panel: Notes</span><span class="toggle-indicator" aria-hidden="true"></span></button><h2 class="hndle ui-sortable-handle"><span>Intelligence</span></h2>
 			<div class="inside bootstrap-wrapper intel-wrapper">
 				<div class="intel-content half">
-					<h4 class="card-header"><?php print __('Submitter profile', 'gravityformsintel'); ?></h4>
+					<h4 class="card-header"><?php print __('Submitter profile', 'gf_intel'); ?></h4>
 					<?php print $output; ?>
-					<!-- <h4 class="card-header"><?php print __('Analytics', 'gravityformsintel'); ?></h4> -->
+					<!-- <h4 class="card-header"><?php print __('Analytics', 'gf_intel'); ?></h4> -->
 					<div class="card-deck-wrapper m-b-1">
 						<div class="card-deck">
 							<?php print Intel_Df::theme('intel_trafficsource_block', array('trafficsource' => $submission->data['analytics_session']['trafficsource'])); ?>
@@ -131,7 +135,7 @@ class GFIntelAddOn extends GFAddOn {
 							<?php print Intel_Df::theme('intel_browser_environment_block', array('entity' => $submission)); ?>
 						</div>
 					</div>
-					<?php print Intel_Df::theme('intel_visitor_profile_block', array('title' => __('Visit chronology', 'gravityformsintel'), 'markup' => $steps_table, 'no_margin' => 1)); ?>
+					<?php print Intel_Df::theme('intel_visitor_profile_block', array('title' => __('Visit chronology', 'gf_intel'), 'markup' => $steps_table, 'no_margin' => 1)); ?>
 				</div>
 			</div>
 		</div></div>
@@ -139,6 +143,9 @@ class GFIntelAddOn extends GFAddOn {
 	}
 
 	public function hook_gform_entry_info($fid, $entry ) {
+		if (!defined('INTEL_VER')) {
+			return;
+		}
 		$vars = array(
 			'type' => 'gravityform',
 			'fid' => $entry['form_id'],
@@ -151,7 +158,7 @@ class GFIntelAddOn extends GFAddOn {
 			return;
 		}
 		?>
-		<?php esc_html_e( 'Contact', 'gravityformsintel' ); ?>:
+		<?php esc_html_e( 'Contact', 'gf_intel' ); ?>:
 		<?php print Intel_Df::l($visitor->name(), $visitor->uri()); ?>
 		<br /><br />
 		<?php
@@ -222,24 +229,25 @@ class GFIntelAddOn extends GFAddOn {
 	/**
 	 * Creates a custom page for this add-on.
 	 */
-	public function plugin_page() {
-		echo 'This page appears in the Forms menu';
-	}
+	//public function plugin_page() {
+	//	echo 'This page appears in the Forms menu';
+	//}
 
 	/**
 	 * Configures the settings which should be rendered on the add-on settings tab.
 	 *
 	 * @return array
 	 */
+	/*
 	public function plugin_settings_fields() {
 		return array(
 			array(
-				'title'  => esc_html__( 'Intelligence Add-On Settings', 'inteladdon' ),
+				'title'  => esc_html__( 'Intelligence Add-On Settings', 'gf_intel' ),
 				'fields' => array(
 					array(
 						'name'              => 'mytextbox',
-						'tooltip'           => esc_html__( 'This is the tooltip', 'inteladdon' ),
-						'label'             => esc_html__( 'This is the label', 'inteladdon' ),
+						'tooltip'           => esc_html__( 'This is the tooltip', 'gf_intel' ),
+						'label'             => esc_html__( 'This is the label', 'gf_intel' ),
 						'type'              => 'text',
 						'class'             => 'small',
 						'feedback_callback' => array( $this, 'is_valid_setting' ),
@@ -248,6 +256,7 @@ class GFIntelAddOn extends GFAddOn {
 			)
 		);
 	}
+	*/
 
 	/**
 	 * Configures the settings which should be rendered on the Form Settings > Intl Add-On tab.
@@ -256,6 +265,16 @@ class GFIntelAddOn extends GFAddOn {
 	 */
 	public function form_settings_fields( $form ) {
 		$ret = array();
+
+		if (!defined('INTEL_VER')) {
+			$ret[] = array(
+				'title'       => esc_html__( 'Intelligence Settings', 'gf_intel' ),
+				'description' => gf_intel_error_msg_missing_intel(),
+				'fields' => array(),
+			);
+			//echo gf_intel_error_msg_missing_intel();
+			return $ret;
+		}
 
 		require_once INTEL_DIR . "includes/intel.ga.inc";
 
@@ -276,15 +295,15 @@ class GFIntelAddOn extends GFAddOn {
 		}
 		/*
 		$options[] = array(
-			'label' => esc_html__( '-- None --', 'gravityformsintel' ),
+			'label' => esc_html__( '-- None --', 'gf_intel' ),
 			'value' => '',
 		);
 		$options[] = array(
-			'label' => esc_html__( 'Event: Form submission', 'gravityformsintel' ),
+			'label' => esc_html__( 'Event: Form submission', 'gf_intel' ),
 			'value' => 'form_submission-',
 		);
 		$options[] = array(
-			'label' => esc_html__( 'Valued event: Form submission!', 'gravityformsintel' ),
+			'label' => esc_html__( 'Valued event: Form submission!', 'gf_intel' ),
 			'value' => 'form_submission',
 		);
 
@@ -297,42 +316,42 @@ class GFIntelAddOn extends GFAddOn {
 		*/
 
 		$ret[] = array(
-			'title'       => esc_html__( 'Intelligence Settings', 'gravityformsintel' ),
+			'title'       => esc_html__( 'Intelligence Settings', 'gf_intel' ),
 			'description' => '',
 			'fields' => array(),
 		);
 		$ret[] = array(
-			'title'       => esc_html__( 'Submission tracking', 'gravityformsintel' ),
+			'title'       => esc_html__( 'Submission tracking', 'gf_intel' ),
 			'description' => '',
 			'fields'      => array(
 				array(
 					'name'     => 'trackingEventName',
-					'label'    => esc_html__( 'Tracking event/goal', 'gravityformsintel' ),
+					'label'    => esc_html__( 'Tracking event/goal', 'gf_intel' ),
 					'type'     => 'select',
 					'required' => true,
-					'tooltip'  => '<h6>' . esc_html__( 'Tracking event/goal', 'gravityformsintel' ) . '</h6>' . esc_html__( 'Select a tracking event or goal that should be triggered when the form is successfuly submitted.', 'gravityformsintel' ),
+					'tooltip'  => '<h6>' . esc_html__( 'Tracking event/goal', 'gf_intel' ) . '</h6>' . esc_html__( 'Select a tracking event or goal that should be triggered when the form is successfuly submitted.', 'gf_intel' ),
 					'choices'  => $options,
 				),
 				array(
 					'name'     => 'trackingEventValue',
-					'label'    => esc_html__( 'Tracking value', 'gravityformsintel' ),
+					'label'    => esc_html__( 'Tracking value', 'gf_intel' ),
 					'type'     => 'text',
 					'required' => false,
-					'tooltip'  => '<h6>' . esc_html__( 'Tracking value', 'gravityformsintel' ) . '</h6>' . esc_html__( 'Enter a (utility) value to associate with the tracking event/goal. Leave blank to use default value.', 'gravityformsintel' ),
+					'tooltip'  => '<h6>' . esc_html__( 'Tracking value', 'gf_intel' ) . '</h6>' . esc_html__( 'Enter a (utility) value to associate with the tracking event/goal. Leave blank to use default value.', 'gf_intel' ),
 				),
-				array(
-					'name'     => 'trackingConversions',
-					'label'    => esc_html__( 'Track Conversions', 'gravityformsintel' ),
-					'type'     => 'checkbox',
-					'required' => false,
-					'tooltip'  => '<h6>' . esc_html__( 'Tracking value', 'gravityformsintel' ) . '</h6>' . esc_html__( 'Enter a (utility) value to associate with the tracking event/goal. Leave blank to use default value.', 'gravityformsintel' ),
-					'choices' => array(
-						array(
-							'label' => esc_html__( 'Enabled', 'gravityformsintel' ),
-							'name'  => 'enabled',
-						),
-					),
-				),
+				//array(
+				//	'name'     => 'trackingConversions',
+				//	'label'    => esc_html__( 'Track Conversions', 'gf_intel' ),
+				//	'type'     => 'checkbox',
+				//	'required' => false,
+				//	'tooltip'  => '<h6>' . esc_html__( 'Tracking value', 'gf_intel' ) . '</h6>' . esc_html__( 'Enter a (utility) value to associate with the tracking event/goal. Leave blank to use default value.', 'gf_intel' ),
+				//	'choices' => array(
+				//		array(
+				//			'label' => esc_html__( 'Enabled', 'gf_intel' ),
+				//			'name'  => 'enabled',
+				//		),
+				//	),
+				//),
 			)
 		);
 
@@ -341,14 +360,14 @@ class GFIntelAddOn extends GFAddOn {
 		$prop_wf_info = intel()->visitor_property_webform_info();
 
 		$ret[] = array(
-			'title'       => esc_html__( 'Contact field mapping', 'gravityformsintel' ),
+			'title'       => esc_html__( 'Contact field mapping', 'gf_intel' ),
 			'description' => '',
 			//'dependency'  => 'mailchimpList',
 			'fields'      => array(
 				/*
 				array(
 					'name' => 'mappedProperties',
-					'label' => esc_html__( 'Properties', 'gravityformsintel' ),
+					'label' => esc_html__( 'Properties', 'gf_intel' ),
 					'type'  => 'checkbox',
 					'choices' => $prop_options,
 					'class'   => 'scrollable',
@@ -356,10 +375,10 @@ class GFIntelAddOn extends GFAddOn {
 				*/
 				array(
 					'name'      => 'field_map',
-					'label'     => esc_html__( 'Map Fields', 'gravityformsintel' ),
+					'label'     => esc_html__( 'Map Fields', 'gf_intel' ),
 					'type'      => 'field_map',
 					'field_map' => $this->merge_vars_field_map($prop_info, $prop_wf_info),
-					'tooltip'   => '<h6>' . esc_html__( 'Map Fields', 'gravityformsintel' ) . '</h6>' . esc_html__( 'Associate Intelligence properties to the appropriate Gravity Form fields by selecting.', 'gravityformsintel' ),
+					'tooltip'   => '<h6>' . esc_html__( 'Map Fields', 'gf_intel' ) . '</h6>' . esc_html__( 'Associate Intelligence properties to the appropriate Gravity Form fields by selecting.', 'gf_intel' ),
 				),
 			),
 		);
@@ -424,17 +443,21 @@ class GFIntelAddOn extends GFAddOn {
 	}
 
 	public function pre_submission( $form ) {
+		if (!defined('INTEL_VER')) {
+			return;
+		}
+
 		$props = array();
 		// get visitor token from cookie
 		include_once INTEL_DIR . 'includes/class-intel-visitor.php';
-		if (isset($form['gravityformsintel']) && is_array($form['gravityformsintel'])) {
-			foreach ($form['gravityformsintel'] as $k => $v) {
+		if (isset($form['gf_intel']) && is_array($form['gf_intel'])) {
+			foreach ($form['gf_intel'] as $k => $v) {
 				if (!empty($v) && (strpos($k, 'field_map') === 0)) {
 					$propKey = str_replace('field_map_', '', $k);
 					$propKey = str_replace('_', '.', $propKey);
 					$postKey = 'input_' . str_replace('.', '_', $v);
 					if (isset($_POST[$postKey])) {
-						$props[$propKey] = $_POST[$postKey];
+						$props[$propKey] = sanitize_text_field($_POST[$postKey]);
 					}
 				}
 			}
@@ -454,6 +477,9 @@ class GFIntelAddOn extends GFAddOn {
 	}
 
 	public function custom_confirmation_message( $confirmation, $form, $entry, $ajax ) {
+		if (!defined('INTEL_VER')) {
+			return $confirmation;
+		}
 		$vars = intel_form_submission_vars_default();
 
 		$submission = &$vars['submission'];
@@ -467,14 +493,14 @@ class GFIntelAddOn extends GFAddOn {
 		//$submission->submission_uri = "/wp-admin/admin.php?page=gf_entries&view=entry&id={$submission->fid}&lid={$submission->fsid}";
 		$submission->form_title = $form['title'];
 
-		if (!empty($form['gravityformsintel']['trackingEventName'])) {
-			$track['name'] = $form['gravityformsintel']['trackingEventName'];
+		if (!empty($form['gf_intel']['trackingEventName'])) {
+			$track['name'] = $form['gf_intel']['trackingEventName'];
 			if (substr($track['name'], -1) == '-') {
 				$track['name'] = substr($track['name'], 0, -1);
 				$track['valued_event'] = 0;
 			}
-			if (!empty($form['gravityformsintel']['trackingEventValue'])) {
-				$track['value'] = $form['gravityformsintel']['trackingEventValue'];
+			if (!empty($form['gf_intel']['trackingEventValue'])) {
+				$track['value'] = $form['gf_intel']['trackingEventValue'];
 			}
 		}
 

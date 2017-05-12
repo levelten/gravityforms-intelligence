@@ -121,7 +121,7 @@ function gf_intel_plugin_path_info($info) {
       'gravityforms.php'
     )
   );
-  $info['gravityforms_intel'] = array(
+  $info['gf_intel'] = array(
     'directory' => array(
       'gravityforms-intelligence',
       'gravityformsintel',

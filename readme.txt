@@ -4,7 +4,7 @@ Donate link: getlevelten.com/blog/tom
 Tags: analytics, form, google analytics, gravity forms, marketing, metrics, stats, tracking, web form
 Requires at least: 4.5
 Tested up to: 4.7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1-dev
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -29,6 +29,9 @@ This plugin requires that the Intelligence plugin is installed and setup along w
 
 = 1.0.0 =
 * Initial version
+
+= 1.0.1 =
+* Support for submission redirects
 
 == Upgrade Notice ==
 

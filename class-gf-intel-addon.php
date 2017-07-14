@@ -507,14 +507,17 @@ class GFIntelAddOn extends GFAddOn {
 		//Intel_Df::watchdog('custom_confirmation_message form', print_r($form, 1));
 
 		//Intel_Df::watchdog('custom_confirmation_message entry', print_r($entry, 1));
-
 		intel_process_form_submission($vars);
 
 		// if form processed via ajax, return intel pushes with confirmation message
 		//if ($ajax) {
+
+		// for redirects, confirmation will be an array with 'redirect' key for the
+		// url. Only append data for confirmation messages which are strings.
+		if (is_string($confirmation)) {
 			$script = intel()->tracker->get_pushes_script();
 			$confirmation .= "\n$script";
-		//}
+		}
 
 		return $confirmation;
 	}

@@ -8,14 +8,14 @@
 * that starts the plugin.
 *
 * @link              getlevelten.com/blog/tom
-* @since             1.0.0
+* @since             1.1.0-dev
 * @package           Intelligence
 *
 * @wordpress-plugin
 * Plugin Name:       Gravity Forms Intelligence
 * Plugin URI:        http://intelligencewp.com/plugin/gravityforms-intelligence/
 * Description:       Integrates Intelligence with Gravity Forms enabling easy Google Analytics goal tracking and visitor intelligence gathering.
-* Version:           1.0.0
+* Version:           1.0.1-dev
 * Author:            Tom McCracken
 * Author URI:        getlevelten.com/blog/tom
 * License:           GPL-2.0+
@@ -30,7 +30,7 @@ if ( ! defined( 'WPINC' ) ) {
   die;
 }
 
-define('GF_INTEL_VER', '1.0.0');
+define('GF_INTEL_VER', '1.0.1-dev');
 
 add_action( 'gform_loaded', array( 'GF_Intel_AddOn_Bootstrap', 'load' ), 5 );
 

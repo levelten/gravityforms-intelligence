@@ -71,7 +71,7 @@ class GFIntelAddOn extends GFAddOn {
 		$synced = $submission->getSynced();
 
 		// if analytics data not stored, sync data
-		if (!$submission->getSynced()) {
+		if (!$submission->getSynced() || !empty($_GET['intel-refresh'])) {
 			$submission->syncData();
 		}
 		// check if data only paritially updated
@@ -477,6 +477,7 @@ class GFIntelAddOn extends GFAddOn {
 	}
 
 	public function custom_confirmation_message( $confirmation, $form, $entry, $ajax ) {
+//Intel_Df::watchdog('custom_confirmation_message() confirmation', print_r($confirmation, 1));
 		if (!defined('INTEL_VER')) {
 			return $confirmation;
 		}
@@ -505,18 +506,49 @@ class GFIntelAddOn extends GFAddOn {
 		}
 
 		//Intel_Df::watchdog('custom_confirmation_message form', print_r($form, 1));
+		//Intel_Df::watchdog('custom_confirmation_message() var', print_r($vars, 1));
 
-		//Intel_Df::watchdog('custom_confirmation_message entry', print_r($entry, 1));
 		intel_process_form_submission($vars);
 
 		// if form processed via ajax, return intel pushes with confirmation message
 		//if ($ajax) {
 
-		// for redirects, confirmation will be an array with 'redirect' key for the
-		// url. Only append data for confirmation messages which are strings.
+		// For redirects, confirmation will be an array with 'redirect' key for the
+		// url or might already converted to javascript string for redirect.
+		// Only append data for confirmation messages which are strings.
 		if (is_string($confirmation)) {
-			$script = intel()->tracker->get_pushes_script();
-			$confirmation .= "\n$script";
+			// redirect confirmation response might already be converted to string.
+			// detect if that has happened.
+			if (strpos($confirmation, 'gformRedirect()')) {
+				// save pushes to quick cache to be fired on redirect page
+				intel_save_flush_page_intel_pushes();
+				// search script for redirect url
+				if (function_exists('intel_cache_busting_url')) {
+					$pattern = '/document.location.href=["\'](.*?)["\']/';
+					preg_match($pattern, $confirmation, $matches);
+					if (!empty($matches[1])) {
+						$url = intel_cache_busting_url($matches[1]);
+						if ($url != $matches[1]) {
+							$confirmation = str_replace($matches[1], $url, $confirmation);
+						}
+					}
+				}
+			}
+			else {
+				$script = intel()->tracker->get_pushes_script();
+				$confirmation .= "\n$script";
+			}
+
+		}
+		else {
+			// save the page flushes to cache
+			intel_save_flush_page_intel_pushes();
+			// append cache busting query
+			if (function_exists('intel_cache_busting_url')) {
+				if (is_array($confirmation) && !empty($confirmation['redirect'])) {
+					$confirmation['redirect'] = intel_cache_busting_url($confirmation['redirect']);
+				}
+			}
 		}
 
 		return $confirmation;

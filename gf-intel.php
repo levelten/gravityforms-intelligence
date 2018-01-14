@@ -15,7 +15,7 @@
 * Plugin Name:       Gravity Forms Intelligence
 * Plugin URI:        http://intelligencewp.com/plugin/gravityforms-intelligence/
 * Description:       Integrates Intelligence with Gravity Forms enabling easy Google Analytics goal tracking and visitor intelligence gathering.
-* Version:           1.0.1
+* Version:           1.0.2
 * Author:            Tom McCracken
 * Author URI:        getlevelten.com/blog/tom
 * License:           GPL-2.0+
@@ -30,7 +30,7 @@ if ( ! defined( 'WPINC' ) ) {
   die;
 }
 
-define('GF_INTEL_VER', '1.0.1');
+define('GF_INTEL_VER', '1.0.2');
 
 add_action( 'gform_loaded', array( 'GF_Intel_AddOn_Bootstrap', 'load' ), 5 );
 
@@ -53,96 +53,25 @@ function gf_intel_addon() {
     return GFIntelAddOn::get_instance();
 }
 
-function gf_intel_intl_eventgoal_labels() {
-
-  $submission_goals = intel_get_event_goal_info('submission');
-
-  $data = array();
-
-  $data[''] = '-- ' . esc_html__( 'None', 'gf_intel' ) . ' --';
-  $data['form_submission-'] = esc_html__( 'Event: Form submission', 'gf_intel' );
-  $data['form_submission'] = esc_html__( 'Valued event: Form submission!', 'gf_intel' );
-
-
-  foreach ($submission_goals AS $key => $goal) {
-    $data[$key] = esc_html__( 'Goal: ', 'intel') . $goal['goal_title'];
-  }
-
-  return $data;
-}
-
-
 /**
- * Implements hook_intel_url_urn_resolver()
+ * Implements hook_intel_form_type_forms_info()
+ * @param $info
+ * @return mixed
  */
-add_filter('intel_url_urn_resovler', 'gf_intel_url_urn_resovler');
-function gf_intel_url_urn_resovler($vars) {
-    $urn_elms = explode(':', $vars['path']);
-    if ($urn_elms[0] == 'urn') {
-        array_shift($urn_elms);
-    }
-    if ($urn_elms[0] == '') {
-      if ($urn_elms[1] == 'gravityform' && !empty($urn_elms[2])) {
-        $vars['path'] = 'wp-admin/admin.php';
-        $vars['options']['query']['page'] = 'gf_edit_forms';
-        $vars['options']['query']['view'] = 'entry';
-        $vars['options']['query']['id'] = $urn_elms[2];
-        // if 3rd element set, urn specifies an form entry. If only 2, then a
-        // form.
-        if (!empty($urn_elms[3])) {
-          $vars['options']['query']['lid'] = $urn_elms[3];
-        }
-      }
-    }
-
-    return $vars;
-}
-
-/**
- * Implements hook_intel_test_url_parsing_alter()
- */
-add_filter('intel_test_url_parsing_alter', 'gf_intel_test_url_parsing_alter');
-function gf_intel_test_url_parsing_alter($urls) {
-    $urls[] = ':gravityform:1';
-    $urls[] = 'urn::gravityform:1';
-    $urls[] = ':gravityform:1:1';
-    $urls[] = 'urn::gravityform:1:1';
-    return $urls;
-}
-
-/*
-add_filter('intel_plugin_path_info', 'gf_intel_plugin_path_info');
-function gf_intel_plugin_path_info($info) {
-  $info['gravityforms'] = array(
-    'directory' => array(
-      'gravityforms'
-    ),
-    'filename' => array(
-      'gravityforms.php'
-    )
-  );
-  $info['gf_intel'] = array(
-    'directory' => array(
-      'gravityforms-intelligence',
-      'gravityformsintel',
-    ),
-    'filename' => array(
-      'gf-intel.php'
-    )
-  );
-  return $info;
-}
-*/
-
-add_filter('intel_form_type_forms_info', 'gf_intel_form_type_forms_info');
 function gf_intel_form_type_forms_info($info) {
   $info['gravityforms'] = RGFormsModel::get_forms( null, 'title' );
 
   return $info;
 }
+// Register hook_intel_form_type_forms_info()
+add_filter('intel_form_type_forms_info', 'gf_intel_form_type_forms_info');
 
-add_filter('intel_form_type_gravityforms_form_setup', 'gf_intel_form_type_form_setup', 0, 2);
-function gf_intel_form_type_form_setup($data, $info) {
+
+
+/*
+ * Implements hook_intel_form_TYPE_form_setup()
+ */
+function gf_intel_form_type_gravityforms_form_setup($data, $info) {
   $form_meta = RGFormsModel::get_form_meta( $info->id );
   if (empty($form_meta)) {
     return $info;
@@ -172,7 +101,70 @@ function gf_intel_form_type_form_setup($data, $info) {
 
   return $data;
 }
+// Register hook_intel_form_TYPE_form_setup()
+add_filter('intel_form_type_gravityforms_form_setup', 'gf_intel_form_type_gravityforms_form_setup', 0, 2);
 
+/**
+ * Implements hook_intel_url_urn_resolver()
+ */
+function gf_intel_url_urn_resovler($vars) {
+  $urn_elms = explode(':', $vars['path']);
+  if ($urn_elms[0] == 'urn') {
+      array_shift($urn_elms);
+  }
+  if ($urn_elms[0] == '') {
+    if ($urn_elms[1] == 'gravityform' && !empty($urn_elms[2])) {
+      $vars['path'] = 'wp-admin/admin.php';
+      $vars['options']['query']['page'] = 'gf_edit_forms';
+      $vars['options']['query']['view'] = 'entry';
+      $vars['options']['query']['id'] = $urn_elms[2];
+      // if 3rd element set, urn specifies an form entry. If only 2, then a
+      // form.
+      if (!empty($urn_elms[3])) {
+        $vars['options']['query']['lid'] = $urn_elms[3];
+      }
+    }
+  }
+
+  return $vars;
+}
+// Register hook_intel_url_urn_resolver()
+add_filter('intel_url_urn_resovler', 'gf_intel_url_urn_resovler');
+
+/**
+ * Implements hook_intel_test_url_parsing_alter()
+ */
+function gf_intel_test_url_parsing_alter($urls) {
+  $urls[] = ':gravityform:1';
+  $urls[] = 'urn::gravityform:1';
+  $urls[] = ':gravityform:1:1';
+  $urls[] = 'urn::gravityform:1:1';
+  return $urls;
+}
+// Register hook_intel_test_url_parsing_alter()
+add_filter('intel_test_url_parsing_alter', 'gf_intel_test_url_parsing_alter');
+
+/**
+ *  Implements of hook_intel_menu()
+ */
+function gf_intel_menu($items = array()) {
+  $items['admin/config/intel/settings/setup/gf_intel'] = array(
+    'title' => 'Setup',
+    'description' => Intel_Df::t('Gravity Forms Intelligence initial plugin setup'),
+    'page callback' => 'gf_intel_admin_setup_page',
+    'access callback' => 'user_access',
+    'access arguments' => array('admin intel'),
+    'type' => Intel_Df::MENU_LOCAL_ACTION,
+    //'weight' => $w++,
+    'file' => 'admin/gf_intel.admin_setup.inc',
+    'file path' => plugin_dir_path(__FILE__),
+  );
+  return $items;
+}
+// Register hook_intel_menu()
+add_filter('intel_menu_info', 'gf_intel_menu');
+
+/*
 // dependencies notices
 add_action( 'admin_notices', 'gf_intel_plugin_dependency_notice' );
 function gf_intel_plugin_dependency_notice() {
@@ -214,3 +206,4 @@ function gf_intel_error_msg_missing_intel($options = array()) {
   }
   return $msg;
 }
+*/

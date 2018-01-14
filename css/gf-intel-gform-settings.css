@@ -4,3 +4,7 @@
     max-height: 120px;
     overflow-y: auto;
 }
+
+#gaddon-setting-row-trackingEventName span.gf_settings_description {
+    display: inline;
+}

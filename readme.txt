@@ -4,7 +4,7 @@ Donate link: getlevelten.com/blog/tom
 Tags: analytics, form, google analytics, gravity forms, marketing, metrics, stats, tracking, web form
 Requires at least: 4.5
 Tested up to: 4.8
-Stable tag: 1.0.1
+Stable tag: 1.0.2-dev
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,6 +24,14 @@ Install and activate the plugin using your preferred method of plugin installati
 will display on the Settings tab on the edit admin Gravity Forms. You can use this tab to configure submission tracking and profile building.
 
 This plugin requires that the Intelligence plugin is installed and setup along with the Gravity Forms plugin.
+
+== Screen Shots ==
+
+1. Select a goal and goal value to track on different form submissions
+2. Easily add goals to your in Google Analytics
+3. Manage Google Analytics goals without leaving WordPress
+4. Automatically trigger goals on form submission
+5. Set a default goal to make sure no form submissions are missed
 
 == Changelog ==
 

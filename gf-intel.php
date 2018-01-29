@@ -15,7 +15,7 @@
 * Plugin Name:       Gravity Forms Intelligence
 * Plugin URI:        http://intelligencewp.com/plugin/gravityforms-intelligence/
 * Description:       Integrates Intelligence with Gravity Forms enabling easy Google Analytics goal tracking and visitor intelligence gathering.
-* Version:           1.0.2
+* Version:           1.0.2-dev
 * Author:            Tom McCracken
 * Author URI:        getlevelten.com/blog/tom
 * License:           GPL-2.0+
@@ -30,7 +30,7 @@ if ( ! defined( 'WPINC' ) ) {
   die;
 }
 
-define('GF_INTEL_VER', '1.0.2');
+define('GF_INTEL_VER', '1.0.2-dev');
 
 add_action( 'gform_loaded', array( 'GF_Intel_AddOn_Bootstrap', 'load' ), 5 );
 
@@ -51,6 +51,108 @@ class GF_Intel_AddOn_Bootstrap {
 
 function gf_intel_addon() {
     return GFIntelAddOn::get_instance();
+}
+
+/**
+ * Implements hook_intel_form_type_info()
+ */
+function gf_intel_form_type_info($info = array()) {
+  $info['gravityform'] = array(
+    'title' => __( 'Gravity Form', 'gravityforms' ),
+    'plugin' => array(
+      'name' => __( 'Gravity Form', 'gravityforms' ),
+      'slug' => 'gravityforms',
+      'text_domain' => 'gravityforms',
+    ),
+    'submission_data_callback' => 'gf_intel_form_type_submission_data',
+  );
+  return $info;
+}
+// Register hook_intel_form_type_forms_info()
+add_filter('intel_form_type_info', 'gf_intel_form_type_info');
+
+/**
+ * Implements hook_intel_form_type_FORM_TYPE_UN_form_data()
+ */
+function gf_intel_form_type_form_info($data = NULL, $options = array()) {
+  $info = &Intel_Df::drupal_static( __FUNCTION__, array());
+  if (!empty($info) && empty($options['refresh'])) {
+    return $info;
+  }
+  $g_forms = RGFormsModel::get_forms( null, 'title' );
+
+  $intel_eventgoal_options = intel_get_form_submission_eventgoal_options();
+  foreach ($g_forms as $k => $form) {
+    $form_meta = RGFormsModel::get_form_meta($form->id);
+    $row = array(
+      'settings' => array(),
+    );
+    $row['id'] = $form->id;
+    $row['title'] = $form_meta['title'];
+    if (!empty($form_meta['gf_intel'])) {
+      if (!empty($form_meta['gf_intel']['trackSubmission'])) {
+        $row['settings']['track_submission'] = $form_meta['gf_intel']['trackSubmission'];
+        $row['settings']['track_submission__title'] = !empty($intel_eventgoal_options[$form_meta['gf_intel']['trackSubmission']]) ? $intel_eventgoal_options[$form_meta['gf_intel']['trackSubmission']] : $form_meta['gf_intel']['trackSubmission'];
+      }
+      if (!empty($form_meta['gf_intel']['trackSubmissionValue'])) {
+        $row['settings']['track_submission_value'] = $form_meta['gf_intel']['trackSubmissionValue'];
+      }
+
+      $row['settings']['field_map'] = array();
+      foreach ($form_meta['gf_intel'] as $k => $v) {
+        if (!empty($v) && (strpos($k, 'field_map') === 0)) {
+          $propKey = str_replace('field_map_', '', $k);
+          $propKey = str_replace('_', '.', $propKey);
+          $vp_info = intel()->visitor_property_info($propKey);
+          if (!empty($vp_info)) {
+            $row['settings']['field_map'][] = $vp_info['title'];
+          }
+        }
+      }
+    }
+    $row['settings_url'] = '/wp-admin/admin.php?page=gf_edit_forms&view=settings&subview=gf_intel&id=' . $form->id;
+
+    $info[$form->id] = $row;
+  }
+
+  return $info;
+}
+// Register hook_intel_form_type_forms_info()
+add_filter('intel_form_type_gravityform_form_info', 'gf_intel_form_type_form_info');
+
+
+/*
+ * Implements hook_intel_form_type_form_setup()
+ */
+function gf_intel_form_type_submission_data($fid, $fsid) {
+  $data = array();
+  $fs = GFAPI::get_entry($fsid);
+  if (!empty($fs['form_id'])) {
+    $fd = GFAPI::get_form($fs['form_id']);
+  }
+  $data['title'] = $fd['title'];
+  $data['submission_data_url'] = ':gravityform:' . $fid . ':' . $fsid;
+  $data['field_values'] = array();
+  $data['field_titles'] = array();
+  foreach ($fd['fields'] as $field) {
+    $id = (string)$field->id;
+    $k = intel_format_un($field->label);
+    if (!empty($fs[$id])) {
+      $data['field_values'][$k] = $fs[$id];
+      $data['field_titles'][$k] = $field->label;
+    }
+    if (is_array($field->inputs)) {
+      foreach ($field->inputs as $input) {
+        $id = (string)$input['id'];
+        if (!empty($fs[$id])) {
+          $k = intel_format_un($field->label . '__' . $input['label']);
+          $data['field_values'][$k] = $fs[$id];
+          $data['field_titles'][$k] = $field->label . ': ' . $input['label'];
+        }
+      }
+    }
+  }
+  return $data;
 }
 
 /**

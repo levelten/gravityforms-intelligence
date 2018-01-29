@@ -1,10 +1,12 @@
 /* placeholder for css */
 
+/* styling for page=gf_edit_form view=settings */
+
 #gform-settings #gaddon-setting-row-mappedProperties td {
     max-height: 120px;
     overflow-y: auto;
 }
 
-#gaddon-setting-row-trackingEventName span.gf_settings_description {
+#gaddon-setting-row-trackSubmission span.gf_settings_description {
     display: inline;
 }

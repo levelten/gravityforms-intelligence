@@ -53,6 +53,35 @@ function gf_intel_addon() {
     return GFIntelAddOn::get_instance();
 }
 
+function gf_intel_activation() {
+  if (is_callable('intel_activate_plugin')) {
+    intel_activate_plugin('gf_intel');
+  }
+}
+register_activation_hook( __FILE__, 'gf_intel_activation' );
+
+function _gf_intel_uninstall() {
+  require_once plugin_dir_path( __FILE__ ) . 'gf-intel.install';
+  gf_intel_uninstall();
+}
+register_uninstall_hook( __FILE__, '_gf_intel_uninstall' );
+
+/**
+ * Implements hook_intel_system_info()
+ *
+ * @param array $info
+ * @return array
+ */
+function gf_intel_intel_system_info($info = array()) {
+  $info['gf_intel'] = array(
+    'plugin_file' => 'gf-intel.php', // Main plugin file
+    'plugin_path' => GFIntelAddOn::$dir, // The path to the directory containing file
+    'update_file' => 'gf-intel.install', // default [plugin_un].install
+  );
+  return $info;
+}
+add_filter('intel_system_info', 'gf_intel_intel_system_info');
+
 /**
  * Implements hook_intel_form_type_info()
  */

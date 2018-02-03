@@ -598,21 +598,21 @@ class GFIntelAddOn extends GFAddOn {
 		$submission->form_title = $form['title'];
 
 		// if tracking event/value settings are empty, use defaults
-		if (empty($form['gf_intel']['trackingEventName'])) {
-			$form['gf_intel']['trackingEventName'] = get_option('intel_form_submission_tracking_event_name_default', 'form_submission');
+		if (empty($form['gf_intel']['trackSubmission'])) {
+			$form['gf_intel']['trackSubmission'] = get_option('intel_form_track_submission_default', 'form_submission');
 		}
 		if (!empty($form['gf_intel']['trackingEventValue'])) {
-			$form['gf_intel']['trackingEventValue'] = get_option('intel_form_submission_tracking_event_value_default', '');
+			$form['gf_intel']['trackSubmissionValue'] = get_option('intel_form_track_submission_value_default', '');
 		}
 
-		if (!empty($form['gf_intel']['trackingEventName'])) {
-			$track['name'] = $form['gf_intel']['trackingEventName'];
+		if (!empty($form['gf_intel']['trackSubmission'])) {
+			$track['name'] = $form['gf_intel']['trackSubmission'];
 			if (substr($track['name'], -1) == '-') {
 				$track['name'] = substr($track['name'], 0, -1);
 				$track['valued_event'] = 0;
 			}
-			if (!empty($form['gf_intel']['trackingEventValue'])) {
-				$track['value'] = $form['gf_intel']['trackingEventValue'];
+			if (!empty($form['gf_intel']['trackSubmissionValue'])) {
+				$track['value'] = $form['gf_intel']['trackSubmissionValue'];
 			}
 		}
 

@@ -28,9 +28,7 @@ Google Analytics goal tracking for Gravity Forms made easy.
 
 #### Enhanced Google Analytics
 
-Intelligence is a framework for enabling websites to generate actionable, results oriented Google Analytics. This plugin
-enables you to easily trigger analytics goals and events for Gravity Form submissions. The Pro version also enables
-you to progressively build contact profiles of your site visitors based on form submissions and 3rd party data.
+Intelligence is a framework for enabling websites to generate actionable, results oriented Google Analytics. This plugin enables you to easily trigger analytics goals and events for Gravity Form submissions. The Pro version also enables you to progressively build contact profiles of your site visitors based on form submissions and 3rd party data.
 
 To learn more about Intelligence for WordPress visit [intelligencewp.com](http://intelligencewp.com)
 

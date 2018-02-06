@@ -15,7 +15,7 @@
 * Plugin Name:       Gravity Forms Intelligence
 * Plugin URI:        https://wordpress.org/plugins/gf-intelligence
 * Description:       Integrates Intelligence with Gravity Forms enabling easy Google Analytics goal tracking and visitor intelligence gathering.
-* Version:           1.0.3
+* Version:           1.0.4
 * Author:            LevelTen
 * Author URI:        https://intelligencewp.com
 * License:           GPL-2.0+
@@ -30,11 +30,11 @@ if ( ! defined( 'WPINC' ) ) {
   die;
 }
 
-define('GF_INTEL_VER', '1.0.3');
+define('GF_INTEL_VER', '1.0.4');
 
-define( 'GF_INTEL_DIR', plugin_dir_path( dirname( __FILE__ ) ) );
+define( 'GF_INTEL_DIR', plugin_dir_path( __FILE__ ) );
 
-define( 'GF_INTEL_URL', plugin_dir_url( dirname( __FILE__ ) ) );
+define( 'GF_INTEL_URL', plugin_dir_url( __FILE__ ) );
 
 add_action( 'gform_loaded', array( 'GF_Intel_AddOn_Bootstrap', 'load' ), 5 );
 
@@ -79,7 +79,9 @@ register_uninstall_hook( __FILE__, '_gf_intel_uninstall' );
 function gf_intel_intel_system_info($info = array()) {
   $info['gf_intel'] = array(
     'plugin_file' => 'gf-intel.php', // Main plugin file
-    'plugin_path' => GF_INTEL_DIR, // The path to the directory containing file
+    'plugin_path' => GF_INTEL_DIR, // Relative path to the directory containing file
+    'plugin_dir' => GF_INTEL_DIR, // Absolute path to the directory containing file
+    'plugin_url' => GF_INTEL_URL, // The url path to the
     'update_file' => 'gf-intel.install', // default [plugin_un].install
   );
   return $info;

@@ -13,25 +13,41 @@ class GFIntelAddOn extends GFAddOn {
 	protected $_short_title = 'Intelligence';
 	protected $submissionProps = null;
 
-	private static $plugin_un = 'gf_intel';
+	/**
+	 * Intel plugin unique name
+	 * @var string
+	 */
+	public $plugin_un = 'gf_intel';
 
-	private static $_instance = null;
+	/**
+	 * Intel form type unique name
+	 * @var string
+	 */
+	public $form_type_un = 'gravityform';
 
 	/**
 	 * Plugin Directory
 	 *
-	 * @since 3.0
+	 * @since 3.0.0
 	 * @var string $dir
 	 */
-	public static $dir = '';
+	public $dir = '';
 
 	/**
 	 * Plugin URL
 	 *
-	 * @since 3.0
+	 * @since 3.0.0
 	 * @var string $url
 	 */
-	public static $url = '';
+	public $url = '';
+
+	/**
+	 * @var array
+	 * @since 3.0.0
+	 */
+	public $plugin_info = array();
+
+	private static $_instance = null;
 
 	/**
 	 * Get an instance of this class.
@@ -43,10 +59,6 @@ class GFIntelAddOn extends GFAddOn {
 			self::$_instance = new GFIntelAddOn();
 		}
 
-		self::$dir = plugin_dir_path(__FILE__);
-
-		self::$url = plugin_dir_url(__FILE__);
-
 		return self::$_instance;
 	}
 
@@ -56,7 +68,12 @@ class GFIntelAddOn extends GFAddOn {
 	public function init() {
 		parent::init();
 
-		if (is_callable('intel')) {
+		$this->plugin_info = $this->intel_plugin_info();
+
+		$this->dir = plugin_dir_path(__FILE__);
+
+		$this->url = plugin_dir_url(__FILE__);
+		//if (is_callable('intel')) {
 			add_action( 'gform_pre_submission', array( $this, 'pre_submission' ), 10, 1 );
 			add_filter( 'gform_confirmation', array( $this, 'custom_confirmation_message' ), 10, 4 );
 			add_action( 'gform_after_submission', array( $this, 'after_submission' ), 10, 2 );
@@ -70,19 +87,37 @@ class GFIntelAddOn extends GFAddOn {
 					add_action('gform_entry_detail', array( $this, 'hook_gform_entry_detail_content' ), 10, 2 );
 				}
 			}
-		}
+		//}
 		// plugin setup hooks
-		else {
+		//else {
 			// Add pages for plugin setup
-			add_action( 'admin_menu', array( $this, 'intel_setup_menu' ));
-		}
+			add_action('wp_loaded', array($this, 'wp_loaded'));
+		//}
 
-		// setup notice on plugins page
-		global $pagenow;
+		/**
+		 * Intelligence hooks
+		 */
 
-		if ( 'plugins.php' == $pagenow ) {
-			add_action( 'admin_notices', array( $this, 'plugin_setup_notice') );
-		}
+		// Register hook_intel_system_info()
+		add_filter('intel_system_info', array( $this, 'intel_system_info' ));
+
+		// Register hook_intel_menu()
+		add_filter('intel_menu_info', array( $this, 'intel_menu_info' ));
+
+		// Register hook_intel_demo_pages()
+		add_filter('intel_demo_posts', array( $this, 'intel_demo_posts' ));
+
+		// Register hook_intel_form_type_info()
+		add_filter('intel_form_type_info', array( $this, 'intel_form_type_info'));
+
+		// Register hook_intel_form_type_FORM_TYPE_UN_form_info()
+		add_filter('intel_form_type_' . $this->form_type_un . '_form_info', array( $this, 'intel_form_type_form_info' ));
+
+		// Register hook_intel_url_urn_resolver()
+		add_filter('intel_url_urn_resolver', array( $this, 'intel_url_urn_resolver'));
+
+		// Register hook_intel_test_url_parsing_alter()
+		add_filter('intel_test_url_parsing_alter', array( $this, 'intel_test_url_parsing_alter'));
 
 	}
 
@@ -96,18 +131,18 @@ class GFIntelAddOn extends GFAddOn {
 	 */
 	public function plugin_settings_fields() {
 
-		wp_enqueue_style('intel-gf-settings', self::$url . 'css/gf-intel-gf-settings.css');
+		wp_enqueue_style('intel-gf-settings', $this->url . 'css/gf-intel-gf-settings.css');
 
 		$items = array();
 
 		$items[] = '<div class="wrap">';
-		$items[] = '<h1>' . esc_html__( 'Intelligence Settings', self::$plugin_un ) . '</h1>';
+		$items[] = '<h1>' . esc_html__( 'Intelligence Settings', $this->plugin_un ) . '</h1>';
 		$items[] = '</div>';
 
-		$connect_desc = __('Not connected.', self::$plugin_un);
+		$connect_desc = __('Not connected.', $this->plugin_un);
 		$connect_desc .= ' ' . sprintf(
-				__( ' %sSetup Intelligence%s', self::$plugin_un ),
-				'<a href="/wp-admin/admin.php?page=intel_admin&plugin=' . self::$plugin_un . '&q=admin/config/intel/settings/setup/' . self::$plugin_un . '" class="button">', '</a>'
+				__( ' %sSetup Intelligence%s', $this->plugin_un ),
+				'<a href="/wp-admin/admin.php?page=intel_admin&plugin=' . $this->plugin_un . '&q=admin/config/intel/settings/setup/' . $this->plugin_un . '" class="button">', '</a>'
 			);
 		if($this->is_intel_installed()) {
 			$connect_desc = __('Connected');
@@ -116,7 +151,7 @@ class GFIntelAddOn extends GFAddOn {
 		$items[] = '<table class="form-table">';
 		$items[] = '<tbody>';
 		$items[] = '<tr>';
-		$items[] = '<th>' . esc_html__( 'Intelligence API', self::$plugin_un ) . '</th>';
+		$items[] = '<th>' . esc_html__( 'Intelligence API', $this->plugin_un ) . '</th>';
 		$items[] = '<td>' . $connect_desc . '</td>';
 		$items[] = '</tr>';
 
@@ -129,15 +164,15 @@ class GFIntelAddOn extends GFAddOn {
 			$l_options['attributes'] = array(
 				'class' => array('button'),
 			);
-			$value .= ' ' . Intel_Df::l(esc_html__('Change', self::$plugin_un), 'admin/config/intel/settings/form/default_tracking', $l_options);
+			$value .= ' ' . Intel_Df::l(esc_html__('Change', $this->plugin_un), 'admin/config/intel/settings/form/default_tracking', $l_options);
 			$items[] = '<tr>';
-			$items[] = '<th>' . esc_html__( 'Default submission event/goal', self::$plugin_un ) . '</th>';
+			$items[] = '<th>' . esc_html__( 'Default submission event/goal', $this->plugin_un ) . '</th>';
 			$items[] = '<td>' . $value . '</td>';
 			$items[] = '</tr>';
 
 			$default_value = get_option('intel_form_track_submission_value_default', '');
 			$items[] = '<tr>';
-			$items[] = '<th>' . esc_html__( 'Default submission value', self::$plugin_un ) . '</th>';
+			$items[] = '<th>' . esc_html__( 'Default submission value', $this->plugin_un ) . '</th>';
 			$items[] = '<td>' . (!empty($default_value) ? $default_value : Intel_Df::t('(default)')) . '</td>';
 			$items[] = '</tr>';
 		}
@@ -345,7 +380,7 @@ class GFIntelAddOn extends GFAddOn {
 	public function form_settings_fields( $form ) {
 		$ret = array();
 
-		wp_enqueue_script('gf_intel_form_settings', self::$url . 'js/gf-intel-gform-settings.js');
+		wp_enqueue_script('gf_intel_form_settings', $this->url . 'js/gf-intel-gform-settings.js');
 
 		if (!defined('INTEL_VER')) {
 			$ret[] = array(
@@ -546,6 +581,7 @@ class GFIntelAddOn extends GFAddOn {
 	}
 
 	public function pre_submission( $form ) {
+Intel_Df::watchdog('gfi_pre_submission form', print_r($form, 1));
 		if (!defined('INTEL_VER')) {
 			return;
 		}
@@ -580,7 +616,7 @@ class GFIntelAddOn extends GFAddOn {
 	}
 
 	public function custom_confirmation_message( $confirmation, $form, $entry, $ajax ) {
-//Intel_Df::watchdog('custom_confirmation_message() confirmation', print_r($confirmation, 1));
+Intel_Df::watchdog('custom_confirmation_message() confirmation', print_r($confirmation, 1));
 		if (!defined('INTEL_VER')) {
 			return $confirmation;
 		}
@@ -618,7 +654,7 @@ class GFIntelAddOn extends GFAddOn {
 
 		//Intel_Df::watchdog('custom_confirmation_message form', print_r($form, 1));
 		//Intel_Df::watchdog('custom_confirmation_message() var', print_r($vars, 1));
-
+Intel_Df::watchdog('gf_submission vars', print_r($vars, 1));
 		intel_process_form_submission($vars);
 
 		// if form processed via ajax, return intel pushes with confirmation message
@@ -675,10 +711,30 @@ class GFIntelAddOn extends GFAddOn {
 		return;
 	}
 
-	/*************************************
-	 * Plugin setup functions
-	 */
 
+
+	/**
+	 * Implements hook_wp_loaded()
+	 *
+	 * Used to check if Intel is not loaded and include setup process if needed.
+	 * Alternatively this check can be done in hook_admin_menu() if the plugin
+	 * implements hook_admin_menu()
+	 */
+	public function wp_loaded() {
+		// check if Intel is installed, add setup processing if not
+		if (!$this->is_intel_installed()) {
+			require_once( $this->dir . 'gf-intel.setup.inc' );
+		}
+	}
+
+	/**
+	 * Returns if Intelligence plugin is installed and setup.
+	 *
+	 * @param string $level
+	 * @return mixed
+	 *
+	 * @see intel_is_installed()
+	 */
 	public function is_intel_installed($level = 'min') {
 		if (!is_callable('intel_is_installed')) {
 			return FALSE;
@@ -686,102 +742,346 @@ class GFIntelAddOn extends GFAddOn {
 		return intel_is_installed($level);
 	}
 
-	public function plugin_setup_notice() {
-		// check dependencies
-		if (!function_exists('intel_is_plugin_active')) {
-			echo '<div class="error">';
-			echo '<p>';
-			echo '<strong>' . __('Notice:') . '</strong> ';
-
-			_e('Gravity Forms Intelligence plugin needs to be setup:', self::$plugin_un);
-			echo ' ' . sprintf(
-				__( ' %sSetup plugin%s', 'gf_intel' ),
-				'<a href="/wp-admin/admin.php?page=intel_admin&plugin=' . self::$plugin_un . '&q=admin/config/intel/settings/setup/' . self::$plugin_un . '" class="button">', '</a>'
-			);
-
-			echo '</p>';
-			echo '</div>';
-			return;
-		}
-
-		if (!intel_is_plugin_active('gravityforms')) {
-			echo '<div class="error">';
-			echo '<p>';
-			echo '<strong>' . __('Notice:') . '</strong> ';
-			_e('The Gravity Forms Intelligence plugin requires the Gravity Forms plugin to be installed and active.', self::$plugin_un);
-			echo '</p>';
-			echo '</div>';
-			return;
-		}
+	/**
+	 * Provides plugin data for hook_intel_system_info()
+	 *
+	 * @param array $info
+	 * @return array
+	 *
+	 * @see Intel::
+	 */
+	public function intel_plugin_info($info = array()) {
+		$info = array(
+			// The unique name for this plugin
+			'plugin_un' => $this->plugin_un,
+			// Title of the plugin
+			'plugin_title' => __('Gravity Forms Google Analytics Intelligence', $this->plugin_un),
+			// Shorter version of title used when reduced characters are desired
+			'plugin_title_short' => __('Gravity Forms GA Intelligence', $this->plugin_un),
+			// Main plugin file
+			'plugin_file' => 'gf-intel.php', // Main plugin file
+			// The server path to the plugin files directory
+			'plugin_dir' => $this->dir,
+			// The browser path to the plugin files directory
+			'plugin_url' => $this->url,
+			// The install file for the plugin if different than [plugin_un].install
+			// Used to auto discover database updates
+			'update_file' => 'gf-intel.install', // default [plugin_un].install
+			// If this plugin extends a plugin other than Intelligence, include that
+			// plugin's info in 'extends_' properties
+			// The extends plugin unique name
+			'extends_plugin_un' => 'gravityforms',
+			// the extends plugin text domain key
+			'extends_plugin_text_domain' => 'gravityforms',
+			// the extends plugin title
+			'extends_plugin_title' => __('Gravity Forms', 'gravityforms'),
+		);
+		return $info;
 	}
 
 	/**
-	 * Implements hook_activated_plugin()
+	 * Implements hook_intel_system_info()
 	 *
-	 * Used to redirect back to wizard after intel is activated
+	 * Registers plugin with intel_system
 	 *
-	 * @param $plugin
+	 * @param array $info
+	 * @return array
 	 */
-	public function intel_setup_activated_plugin($plugin) {
-		require_once( self::$dir . 'intel_com/intel.setup.inc' );
-		intel_setup_activated_plugin($plugin);
+	public function intel_system_info($info = array()) {
+		// array of plugin info indexed by plugin_un
+		$info[$this->plugin_un] = $this->intel_plugin_info();
+		return $info;
 	}
 
-	public function intel_setup_menu() {
-		global $wp_version;
-
-		// check if intel is installed, if so exit
-		if (is_callable('intel')) {
-			return;
-		}
-
-		add_menu_page(esc_html__("Intelligence", self::$plugin_un), esc_html__("Intelligence", self::$plugin_un), 'manage_options', 'intel_admin', array($this, 'intel_setup_page'), version_compare($wp_version, '3.8.0', '>=') ? 'dashicons-analytics' : '');
-		add_submenu_page('intel_admin', esc_html__("Setup", self::$plugin_un), esc_html__("Setup", self::$plugin_un), 'manage_options', 'intel_admin', array($this, 'intel_setup_page'));
-
-		add_action('activated_plugin', array( $this, 'intel_setup_activated_plugin' ));
-	}
-
-	public function intel_setup_page() {
-		if (!empty($_GET['plugin']) && $_GET['plugin'] != self::$plugin_un) {
-			return;
-		}
-		$output = $this->intel_setup_plugin_instructions();
-
-		print $output;
-	}
-
-	public function intel_setup_plugin_instructions($options = array()) {
-
-		require_once( self::$dir . 'intel_com/intel.setup.inc' );
-
-
-		// initialize setup state option
-		$intel_setup = get_option('intel_setup', array());
-		$intel_setup['active_path'] = 'admin/config/intel/settings/setup/' . self::$plugin_un;
-		update_option('intel_setup', $intel_setup);
-
-		intel_setup_set_activated_option('intelligence', array('destination' => $intel_setup['active_path']));
-
-		$items = array();
-
-		$items[] = '<h1>' . __('Gravity Forms Intelligence Setup', self::$plugin_un) . '</h1>';
-		$items[] = __('To continue with the setup please install the Intelligence plugin.', self::$plugin_un);
-
-		$items[] = "<br>\n<br>\n";
-
-		$vars = array(
-			'plugin_slug' => 'intelligence',
-			'card_class' => array(
-				'action-buttons-only'
-			),
-			//'activate_url' => $activate_url,
+	/**
+	 * Implements hook_intel_menu_info()
+	 *
+	 * @param array $items
+	 * @return array
+	 */
+	public function intel_menu_info($items = array()) {
+		// route for Admin > Intelligence > Settings > Setup > Ninja Forms
+		$items['admin/config/intel/settings/setup/' . $this->plugin_un] = array(
+			'title' => 'Setup',
+			'description' => $this->plugin_info['plugin_title'] . ' ' . __('initial plugin setup', $this->plugin_un),
+			'page callback' => $this->plugin_un . '_admin_setup_page',
+			'access callback' => 'user_access',
+			'access arguments' => array('admin intel'),
+			'type' => Intel_Df::MENU_LOCAL_TASK,
+			'file' => 'admin/' . $this->plugin_un . '.admin_setup.inc',
+			'file path' => $this->dir,
 		);
-		$vars = intel_setup_process_install_plugin_card($vars);
-
-		$items[] = '<div class="intel-setup">';
-		$items[] = intel_setup_theme_install_plugin_card($vars);
-		$items[] = '</div>';
-
-		return implode(' ', $items);
+		// rout for Admin > Intelligence > Help > Demo > Ninja Forms
+		$items['admin/help/demo/' . $this->plugin_un] = array(
+			'title' => $this->plugin_info['extends_plugin_title'],
+			'page callback' => array($this, 'intel_admin_help_demo_page'),
+			'access callback' => 'user_access',
+			'access arguments' => array('admin intel'),
+			'intel_install_access' => 'min',
+			'type' => Intel_Df::MENU_LOCAL_TASK,
+			'weight' => 10,
+		);
+		return $items;
 	}
+
+	/*
+   * Provides an Intelligence > Help > Demo > Example page
+   */
+	public function intel_admin_help_demo_page() {
+		$output = '';
+
+		$demo_mode = get_option('intel_demo_mode', 0);
+
+		$output .= '<div class="card">';
+		$output .= '<div class="card-block clearfix">';
+
+		$output .= '<p class="lead">';
+		$output .= Intel_Df::t('Try out your Ninja Forms tracking!');
+		//$output .= ' ' . Intel_Df::t('This tutorial will walk you through the essentials of extending Google Analytics using Intelligence to create results oriented analytics.');
+		$output .= '</p>';
+
+		/*
+    $l_options = Intel_Df::l_options_add_class('btn btn-info');
+    $l_options = Intel_Df::l_options_add_destination(Intel_Df::current_path(), $l_options);
+    $output .= Intel_Df::l( Intel_Df::t('Demo settings'), 'admin/config/intel/settings/general/demo', $l_options) . '<br><br>';
+    */
+
+		$output .= '<div class="row">';
+		$output .= '<div class="col-md-6">';
+		$output .= '<p>';
+		$output .= '<h3>' . Intel_Df::t('First') . '</h3>';
+		$output .= __('Launch Google Analytics to see conversions in real-time:', $this->plugin_un);
+		$output .= '</p>';
+
+		$output .= '<div>';
+		$l_options = Intel_Df::l_options_add_target('ga');
+		$l_options = Intel_Df::l_options_add_class('btn btn-info m-b-_5', $l_options);
+		$url = 	$url = intel_get_ga_report_url('rt_goal');
+		$output .= Intel_Df::l( Intel_Df::t('View real-time conversion goals'), $url, $l_options);
+
+		$output .= '<br>';
+
+		$l_options = Intel_Df::l_options_add_target('ga');
+		$l_options = Intel_Df::l_options_add_class('btn btn-info m-b-_5', $l_options);
+		$url = 	$url = intel_get_ga_report_url('rt_event');
+		$output .= Intel_Df::l( Intel_Df::t('View real-time events'), $url, $l_options);
+		$output .= '</div>';
+		$output .= '</div>'; // end col-x-6
+
+		$output .= '<div class="col-md-6">';
+
+		$output .= '<p>';
+		$output .= '<h3>' . Intel_Df::t('Next') . '</h3>';
+		$output .= __('Pick one of your forms to test:', $this->plugin_un);
+		$output .= '</p>';
+
+		$forms = $this->intel_form_type_form_info();
+
+		$l_options = Intel_Df::l_options_add_target($this->plugin_un . '_demo');
+		$l_options = Intel_Df::l_options_add_class('btn btn-info m-b-_5', $l_options);
+		$l_options['query'] = array();
+		$output .= '<div>';
+		foreach ($forms as $form) {
+			$l_options['query']['fid'] = $form['id'];
+			$output .= Intel_Df::l( __('Try', $this->plugin_un) . ': ' . $form['title'], 'intelligence/demo/' . $this->plugin_un, $l_options);
+			$output .= '<br>';
+		}
+		$output .= '</div>';
+
+		$output .= '</div>'; // end col-x-6
+		$output .= '</div>'; // end row
+
+		$output .= '</div>'; // end card-block
+		$output .= '</div>'; // end card
+
+		return $output;
+	}
+
+	/**
+	 * Implements hook_intel_demo_pages()
+	 *
+	 * Adds a demo page to test tracking for this plugin.
+	 *
+	 * @param array $posts
+	 * @return array
+	 */
+	public function intel_demo_posts($posts = array()) {
+		$id = -1 * (count($posts) + 1);
+
+		$forms = $this->intel_form_type_form_info();
+
+		$content = '';
+		if (!empty($_GET['fid']) && !empty($forms[$_GET['fid']])) {
+			$form = $forms[$_GET['fid']];
+			$content .= '<br>';
+			$content .= '[ninja_form id="' . $form['id'] . '"]';
+		}
+		elseif (!empty($forms)) {
+			$form = array_shift($forms);
+			$content .= '<br>';
+			$content .= '[ninja_form id="' . $form['id'] . '"]';
+		}
+		else {
+			$content = __('No Ninja forms were found', $this->plugin_un);
+		}
+		$posts["$id"] = array(
+			'ID' => $id,
+			'post_type' => 'page',
+			'post_title' => __('Demo') . ' ' . $this->plugin_info['extends_plugin_title'],
+			'post_content' => $content,
+			'intel_demo' => array(
+				'url' => 'intelligence/demo/' . $this->plugin_un,
+			),
+		);
+
+		return $posts;
+	}
+
+	/**
+	 * Implements hook_form_type_info()
+	 *
+	 * Registers a form type provided by or connected to this plugin. Only needed
+	 * if the plugin provides a form such as Contact Form 7, Ninja Forms or Gravity Forms.
+	 *
+	 * Optional: Remove if plugin does not provide a form type to be tracked
+	 *
+	 * @param array $info
+	 * @return array
+	 */
+	public function intel_form_type_info($info = array()) {
+		$info[$this->form_type_un] = array(
+			// A machine name to uniquely identify the form type provided by this plugin.
+			'un' => $this->form_type_un,
+			// Human readable name of the form type provided by this plugin.
+			'title' => __( 'Gravity Form', $this->plugin_info['extends_plugin_text_domain'] ),
+			// The plugin unique name for this plugin
+			'plugin_un' => $this->plugin_un,
+			// form tracking features addon supports
+			'supports' => array(
+				'track_submission' => 1,
+				'track_submission_value' => 1,
+			),
+			// Callback to get data for form submissions
+			'submission_data_callback' => array($this, 'intel_form_type_submission_data'),
+		);
+		return $info;
+	}
+
+	/**
+	 * Implements hook_intel_form_type_FORM_TYPE_UN_form_data()
+	 */
+	function intel_form_type_form_info($data = NULL, $options = array()) {
+		$info = &Intel_Df::drupal_static( __FUNCTION__, array());
+		if (!empty($info) && empty($options['refresh'])) {
+			return $info;
+		}
+		$g_forms = RGFormsModel::get_forms( null, 'title' );
+
+		$intel_eventgoal_options = intel_get_form_submission_eventgoal_options();
+		foreach ($g_forms as $k => $form) {
+			$form_meta = RGFormsModel::get_form_meta($form->id);
+			$row = array(
+				'settings' => array(),
+			);
+			$row['id'] = $form->id;
+			$row['title'] = $form_meta['title'];
+			if (!empty($form_meta['gf_intel'])) {
+				if (!empty($form_meta['gf_intel']['trackSubmission'])) {
+					$row['settings']['track_submission'] = $form_meta['gf_intel']['trackSubmission'];
+					$row['settings']['track_submission__title'] = !empty($intel_eventgoal_options[$form_meta['gf_intel']['trackSubmission']]) ? $intel_eventgoal_options[$form_meta['gf_intel']['trackSubmission']] : $form_meta['gf_intel']['trackSubmission'];
+				}
+				if (!empty($form_meta['gf_intel']['trackSubmissionValue'])) {
+					$row['settings']['track_submission_value'] = $form_meta['gf_intel']['trackSubmissionValue'];
+				}
+
+				$row['settings']['field_map'] = array();
+				foreach ($form_meta['gf_intel'] as $k => $v) {
+					if (!empty($v) && (strpos($k, 'field_map') === 0)) {
+						$propKey = str_replace('field_map_', '', $k);
+						$propKey = str_replace('_', '.', $propKey);
+						$vp_info = intel()->visitor_property_info($propKey);
+						if (!empty($vp_info)) {
+							$row['settings']['field_map'][] = $vp_info['title'];
+						}
+					}
+				}
+			}
+			$row['settings_url'] = '/wp-admin/admin.php?page=gf_edit_forms&view=settings&subview=gf_intel&id=' . $form->id;
+
+			$info[$form->id] = $row;
+		}
+
+		return $info;
+	}
+
+	/*
+   * Implements hook_intel_form_type_form_setup()
+   */
+	function intel_form_type_submission_data($fid, $fsid) {
+		$data = array();
+		$fs = GFAPI::get_entry($fsid);
+		if (!empty($fs['form_id'])) {
+			$fd = GFAPI::get_form($fs['form_id']);
+		}
+		$data['title'] = $fd['title'];
+		$data['submission_data_url'] = ':gravityform:' . $fid . ':' . $fsid;
+		$data['field_values'] = array();
+		$data['field_titles'] = array();
+		foreach ($fd['fields'] as $field) {
+			$id = (string)$field->id;
+			$k = intel_format_un($field->label);
+			if (!empty($fs[$id])) {
+				$data['field_values'][$k] = $fs[$id];
+				$data['field_titles'][$k] = $field->label;
+			}
+			if (is_array($field->inputs)) {
+				foreach ($field->inputs as $input) {
+					$id = (string)$input['id'];
+					if (!empty($fs[$id])) {
+						$k = intel_format_un($field->label . '__' . $input['label']);
+						$data['field_values'][$k] = $fs[$id];
+						$data['field_titles'][$k] = $field->label . ': ' . $input['label'];
+					}
+				}
+			}
+		}
+		return $data;
+	}
+
+	/**
+	 * Implements hook_intel_url_urn_resolver()
+	 */
+	function intel_url_urn_resolver($vars) {
+		$urn_elms = explode(':', $vars['path']);
+		if ($urn_elms[0] == 'urn') {
+			array_shift($urn_elms);
+		}
+		if ($urn_elms[0] == '') {
+			if ($urn_elms[1] == 'gravityform' && !empty($urn_elms[2])) {
+				$vars['path'] = 'wp-admin/admin.php';
+				$vars['options']['query']['page'] = 'gf_edit_forms';
+				$vars['options']['query']['view'] = 'entry';
+				$vars['options']['query']['id'] = $urn_elms[2];
+				// if 3rd element set, urn specifies an form entry. If only 2, then a
+				// form.
+				if (!empty($urn_elms[3])) {
+					$vars['options']['query']['lid'] = $urn_elms[3];
+				}
+			}
+		}
+
+		return $vars;
+	}
+
+	/**
+	 * Implements hook_intel_test_url_parsing_alter()
+	 */
+	function intel_test_url_parsing_alter($urls) {
+		$urls[] = ':gravityform:1';
+		$urls[] = 'urn::gravityform:1';
+		$urls[] = ':gravityform:1:1';
+		$urls[] = 'urn::gravityform:1:1';
+		return $urls;
+	}
+
 }

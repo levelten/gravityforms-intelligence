@@ -921,10 +921,6 @@ class GFIntelAddOn extends GFAddOn {
 		$l_options = Intel_Df::l_options_add_destination(Intel_Df::current_path(), $l_options);
 		$notice_vars['message'] .= ' ' . Intel_Df::l(__('Change demo settings', $this->plugin_un), 'admin/config/intel/settings/general/demo', $l_options);
 
-		//$output .= Intel_Df::theme('wp_notice', $notice_vars);
-
-		//$output .= '<div class="alert alert-default">' . $notice_vars['message'] . '</div>';
-
 		$output .= '<div class="card">';
 		$output .= '<div class="card-block clearfix">';
 		$output .= $notice_vars['message'];

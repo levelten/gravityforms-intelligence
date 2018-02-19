@@ -73,7 +73,7 @@ class GFIntelAddOn extends GFAddOn {
 		$this->dir = plugin_dir_path(__FILE__);
 
 		$this->url = plugin_dir_url(__FILE__);
-		//if (is_callable('intel')) {
+		if (is_callable('intel')) {
 			add_action( 'gform_pre_submission', array( $this, 'pre_submission' ), 10, 1 );
 			add_filter( 'gform_confirmation', array( $this, 'custom_confirmation_message' ), 10, 4 );
 			add_action( 'gform_after_submission', array( $this, 'after_submission' ), 10, 2 );
@@ -87,12 +87,12 @@ class GFIntelAddOn extends GFAddOn {
 					add_action('gform_entry_detail', array( $this, 'hook_gform_entry_detail_content' ), 10, 2 );
 				}
 			}
-		//}
+		}
 		// plugin setup hooks
-		//else {
+		else {
 			// Add pages for plugin setup
 			add_action('wp_loaded', array($this, 'wp_loaded'));
-		//}
+		}
 
 		/**
 		 * Intelligence hooks
@@ -197,8 +197,6 @@ class GFIntelAddOn extends GFAddOn {
 		if (!is_callable('intel')) {
 			return;
 		}
-
-
 
 		// enueue admin styling & scripts
 		// enueue admin styling & scripts
@@ -455,7 +453,7 @@ class GFIntelAddOn extends GFAddOn {
 					'name'     => 'trackSubmission',
 					'label'    => esc_html__( 'Submission event/goal', 'gf_intel' ),
 					'type'     => 'select',
-					'required' => true,
+					'required' => false,
 					'tooltip'  => '<h6>' . esc_html__( 'Submission event/goal', 'gf_intel' ) . '</h6>' . esc_html__( 'Select a tracking event or goal that should be triggered when the form is successfuly submitted.', 'gf_intel' ), // . '<br><br>'  . $add_goal,
 					'choices'  => $eventgoal_options,
 					'description' => $add_goal,
@@ -581,7 +579,7 @@ class GFIntelAddOn extends GFAddOn {
 	}
 
 	public function pre_submission( $form ) {
-Intel_Df::watchdog('gfi_pre_submission form', print_r($form, 1));
+    //Intel_Df::watchdog('gfi_pre_submission form', print_r($form, 1));
 		if (!defined('INTEL_VER')) {
 			return;
 		}
@@ -616,7 +614,7 @@ Intel_Df::watchdog('gfi_pre_submission form', print_r($form, 1));
 	}
 
 	public function custom_confirmation_message( $confirmation, $form, $entry, $ajax ) {
-Intel_Df::watchdog('custom_confirmation_message() confirmation', print_r($confirmation, 1));
+    //Intel_Df::watchdog('custom_confirmation_message() confirmation', print_r($confirmation, 1));
 		if (!defined('INTEL_VER')) {
 			return $confirmation;
 		}
@@ -654,7 +652,7 @@ Intel_Df::watchdog('custom_confirmation_message() confirmation', print_r($confir
 
 		//Intel_Df::watchdog('custom_confirmation_message form', print_r($form, 1));
 		//Intel_Df::watchdog('custom_confirmation_message() var', print_r($vars, 1));
-Intel_Df::watchdog('gf_submission vars', print_r($vars, 1));
+    //Intel_Df::watchdog('gf_submission vars', print_r($vars, 1));
 		intel_process_form_submission($vars);
 
 		// if form processed via ajax, return intel pushes with confirmation message
@@ -800,7 +798,7 @@ Intel_Df::watchdog('gf_submission vars', print_r($vars, 1));
 	 * @return array
 	 */
 	public function intel_menu_info($items = array()) {
-		// route for Admin > Intelligence > Settings > Setup > Ninja Forms
+		// route for Admin > Intelligence > Settings > Setup > Gravity Forms
 		$items['admin/config/intel/settings/setup/' . $this->plugin_un] = array(
 			'title' => 'Setup',
 			'description' => $this->plugin_info['plugin_title'] . ' ' . __('initial plugin setup', $this->plugin_un),
@@ -811,7 +809,7 @@ Intel_Df::watchdog('gf_submission vars', print_r($vars, 1));
 			'file' => 'admin/' . $this->plugin_un . '.admin_setup.inc',
 			'file path' => $this->dir,
 		);
-		// rout for Admin > Intelligence > Help > Demo > Ninja Forms
+		// route for Admin > Intelligence > Help > Demo > Gravity Forms
 		$items['admin/help/demo/' . $this->plugin_un] = array(
 			'title' => $this->plugin_info['extends_plugin_title'],
 			'page callback' => array($this, 'intel_admin_help_demo_page'),
@@ -832,11 +830,29 @@ Intel_Df::watchdog('gf_submission vars', print_r($vars, 1));
 
 		$demo_mode = get_option('intel_demo_mode', 0);
 
+		// function introduced in intel 1.2.8, check it exists.
+		if (is_callable('intel_is_current_user_tracking_excluded') && intel_is_current_user_tracking_excluded()) {
+			$notice_vars = array(
+				'inline' => 1,
+				'type' => 'warning',
+			);
+			$notice_vars['message'] = __('Your user is set to be excluded from tracking on all web pages except Intelligence demo pages.', $this->plugin_un);
+			$notice_vars['message'] .= ' ' . __('If you submit a form that redirects to a non demo page tracking will be disabled.', $this->plugin_un);
+			$notice_vars['message'] .= ' ' . __('Either test only non-redirected forms, with a non-excluded user or', $this->plugin_un);
+			$l_options = Intel_Df::l_options_add_target('intel_admin');
+			$l_options = Intel_Df::l_options_add_destination(Intel_Df::current_path());
+			$notice_vars['message'] .= ' ' . Intel_Df::l(__('change the exclude settings', $this->plugin_un), 'admin/config/intel/settings/general', $l_options) . '.';
+
+			//$output .= Intel_Df::theme('wp_notice', $notice_vars);
+
+			$output .= '<div class="alert alert-info">' . $notice_vars['message'] . '</div>';
+		}
+
 		$output .= '<div class="card">';
 		$output .= '<div class="card-block clearfix">';
 
 		$output .= '<p class="lead">';
-		$output .= Intel_Df::t('Try out your Ninja Forms tracking!');
+		$output .= Intel_Df::t('Try out your Gravity Forms tracking!');
 		//$output .= ' ' . Intel_Df::t('This tutorial will walk you through the essentials of extending Google Analytics using Intelligence to create results oriented analytics.');
 		$output .= '</p>';
 
@@ -894,6 +910,27 @@ Intel_Df::watchdog('gf_submission vars', print_r($vars, 1));
 		$output .= '</div>'; // end card-block
 		$output .= '</div>'; // end card
 
+		// Demo mode alert
+		$notice_vars = array(
+			'inline' => 1,
+			'type' => 'info',
+		);
+		$mode = $demo_mode ? __('enabled') : __('disabled');
+		$notice_vars['message'] = __('Demo pages for anonymous users are currently ', $this->plugin_un) . '<strong>' . $mode . '</strong>.';
+		$l_options = Intel_Df::l_options_add_class('btn btn-default');
+		$l_options = Intel_Df::l_options_add_destination(Intel_Df::current_path(), $l_options);
+		$notice_vars['message'] .= ' ' . Intel_Df::l(__('Change demo settings', $this->plugin_un), 'admin/config/intel/settings/general/demo', $l_options);
+
+		//$output .= Intel_Df::theme('wp_notice', $notice_vars);
+
+		//$output .= '<div class="alert alert-default">' . $notice_vars['message'] . '</div>';
+
+		$output .= '<div class="card">';
+		$output .= '<div class="card-block clearfix">';
+		$output .= $notice_vars['message'];
+		$output .= '</div>'; // end card-block
+		$output .= '</div>'; // end card
+
 		return $output;
 	}
 
@@ -911,18 +948,19 @@ Intel_Df::watchdog('gf_submission vars', print_r($vars, 1));
 		$forms = $this->intel_form_type_form_info();
 
 		$content = '';
+
 		if (!empty($_GET['fid']) && !empty($forms[$_GET['fid']])) {
 			$form = $forms[$_GET['fid']];
 			$content .= '<br>';
-			$content .= '[ninja_form id="' . $form['id'] . '"]';
+			$content .= '[gravityform id="' . $form['id'] . '"]';
 		}
 		elseif (!empty($forms)) {
 			$form = array_shift($forms);
 			$content .= '<br>';
-			$content .= '[ninja_form id="' . $form['id'] . '"]';
+			$content .= '[gravityform id="' . $form['id'] . '"]';
 		}
 		else {
-			$content = __('No Ninja forms were found', $this->plugin_un);
+			$content = __('No Gravity forms were found', $this->plugin_un);
 		}
 		$posts["$id"] = array(
 			'ID' => $id,
@@ -931,6 +969,7 @@ Intel_Df::watchdog('gf_submission vars', print_r($vars, 1));
 			'post_content' => $content,
 			'intel_demo' => array(
 				'url' => 'intelligence/demo/' . $this->plugin_un,
+				'overridable' => 0,
 			),
 		);
 

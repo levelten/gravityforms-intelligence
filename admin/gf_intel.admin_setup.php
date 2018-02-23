@@ -4,9 +4,9 @@
  * Admin configuration management
  */
 
-include_once INTEL_DIR . 'includes/intel.wizard.inc';
+include_once INTEL_DIR . 'includes/intel.wizard.php';
 
-include_once INTEL_DIR . 'admin/intel.admin_setup.inc';
+include_once INTEL_DIR . 'admin/intel.admin_setup.php';
 
 function gf_intel_admin_setup_wizard_info($items = array()) {
   $sys_meta = get_option('intel_system_meta', array());
@@ -53,7 +53,7 @@ function gf_intel_admin_setup_intel_plugin($form, &$form_state) {
 
   //$instructions = gf_intel_admin_setup_intel_plugin_instructions();
 
-  include_once gf_intel()->dir . 'gf-intel.setup.inc';
+  include_once gf_intel()->dir . 'gf-intel.setup.php';
 
   $instructions = gf_intel_setup()->get_intel_install_instructions();
 
@@ -66,7 +66,7 @@ function gf_intel_admin_setup_intel_plugin($form, &$form_state) {
 }
 
 function gf_intel_admin_setup_intel_plugin_check($form, &$form_state) {
-  include_once INTEL_DIR . 'includes/intel.ga.inc';
+  include_once INTEL_DIR . 'includes/intel.ga.php';
 
   $status = array();
 
@@ -88,7 +88,7 @@ function gf_intel_admin_setup_intel_plugin_validate($form, &$form_state) {
 }
 
 function gf_intel_admin_setup_intel_profile($form, &$form_state) {
-  include_once INTEL_DIR . 'admin/intel.admin_setup.inc';
+  include_once INTEL_DIR . 'admin/intel.admin_setup.php';
   $options = array(
     'imapi_property_setup' => array(
       'callback_destination' => Intel_Df::url('admin/config/intel/settings/setup/gf_intel'),
@@ -98,17 +98,17 @@ function gf_intel_admin_setup_intel_profile($form, &$form_state) {
 }
 
 function gf_intel_admin_setup_intel_profile_check($form, &$form_state) {
-  include_once INTEL_DIR . 'admin/intel.admin_setup.inc';
+  include_once INTEL_DIR . 'admin/intel.admin_setup.php';
   return intel_admin_setup_intel_profile_check($form, $form_state);
 }
 
 function gf_intel_admin_setup_intel_profile_validate($form, &$form_state, $status) {
-  include_once INTEL_DIR . 'admin/intel.admin_setup.inc';
+  include_once INTEL_DIR . 'admin/intel.admin_setup.php';
   return intel_admin_setup_intel_profile_validate($form, $form_state, $status);
 }
 
 function gf_intel_admin_setup_intel_profile_submit($form, &$form_state) {
-  include_once INTEL_DIR . 'admin/intel.admin_setup.inc';
+  include_once INTEL_DIR . 'admin/intel.admin_setup.php';
   return intel_admin_setup_intel_profile_submit($form, $form_state);
 }
 

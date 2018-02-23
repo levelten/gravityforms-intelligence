@@ -57,15 +57,15 @@ function gf_intel() {
     return GFIntelAddOn::get_instance();
 }
 
-function _gf_intel_activation() {
+function gf_intel_activation_hook() {
   if (is_callable('intel_activate_plugin')) {
     intel_activate_plugin('gf_intel');
   }
 }
-register_activation_hook( __FILE__, '_gf_intel_activation' );
+register_activation_hook( __FILE__, 'gf_intel_activation_hook' );
 
-function _gf_intel_uninstall() {
-  require_once plugin_dir_path( __FILE__ ) . 'gf-intel.install';
+function gf_intel_uninstall_hook() {
+  require_once plugin_dir_path( __FILE__ ) . 'gf-intel.install.php';
   gf_intel_uninstall();
 }
-register_uninstall_hook( __FILE__, '_gf_intel_uninstall' );
+register_uninstall_hook( __FILE__, 'gf_intel_uninstall_hook' );

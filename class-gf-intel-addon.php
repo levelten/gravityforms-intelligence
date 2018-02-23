@@ -228,7 +228,7 @@ class GFIntelAddOn extends GFAddOn {
 		// json loading
 		$return_type = 'markup';
 		if ($return_type == 'markup') {
-			include_once INTEL_DIR . 'admin/intel.admin_submission.inc';
+			include_once INTEL_DIR . 'admin/intel.admin_submission.php';
 			$options = array(
 				'embedded' => 1,
 				'current_path' => "wp-admin/admin.php?page=gf_entries&view=entry&id={$entry['form_id']}&lid={$entry['id']}",
@@ -236,7 +236,7 @@ class GFIntelAddOn extends GFAddOn {
 			$output = intel_submission_profile_page($submission, $options);
 		}
 		else {
-			include_once INTEL_DIR . 'includes/intel.reports.inc';
+			include_once INTEL_DIR . 'includes/intel.reports.php';
 
 			intel_add_report_headers();
 
@@ -390,7 +390,7 @@ class GFIntelAddOn extends GFAddOn {
 			return $ret;
 		}
 
-		require_once INTEL_DIR . "includes/intel.ga.inc";
+		require_once INTEL_DIR . "includes/intel.ga.php";
 
 		//$scorings = intel_get_scorings();
 
@@ -721,7 +721,7 @@ class GFIntelAddOn extends GFAddOn {
 	public function wp_loaded() {
 		// check if Intel is installed, add setup processing if not
 		if (!$this->is_intel_installed()) {
-			require_once( $this->dir . 'gf-intel.setup.inc' );
+			require_once( $this->dir . 'gf-intel.setup.php' );
 		}
 	}
 
@@ -764,7 +764,7 @@ class GFIntelAddOn extends GFAddOn {
 			'plugin_url' => $this->url,
 			// The install file for the plugin if different than [plugin_un].install
 			// Used to auto discover database updates
-			'update_file' => 'gf-intel.install', // default [plugin_un].install
+			'update_file' => 'gf-intel.install.php', // default [plugin_un].install
 			// If this plugin extends a plugin other than Intelligence, include that
 			// plugin's info in 'extends_' properties
 			// The extends plugin unique name
@@ -806,7 +806,7 @@ class GFIntelAddOn extends GFAddOn {
 			'access callback' => 'user_access',
 			'access arguments' => array('admin intel'),
 			'type' => Intel_Df::MENU_LOCAL_TASK,
-			'file' => 'admin/' . $this->plugin_un . '.admin_setup.inc',
+			'file' => 'admin/' . $this->plugin_un . '.admin_setup.php',
 			'file path' => $this->dir,
 		);
 		// route for Admin > Intelligence > Help > Demo > Gravity Forms

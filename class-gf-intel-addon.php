@@ -752,10 +752,14 @@ class GFIntelAddOn extends GFAddOn {
 		$info = array(
 			// The unique name for this plugin
 			'plugin_un' => $this->plugin_un,
+			// Plugin version
+			'plugin_version' => $this->_version,
 			// Title of the plugin
 			'plugin_title' => __('Gravity Forms Google Analytics Intelligence', $this->plugin_un),
 			// Shorter version of title used when reduced characters are desired
 			'plugin_title_short' => __('Gravity Forms GA Intelligence', $this->plugin_un),
+			// Plugin slug - name of directory containing plugin
+			'plugin_slug' => 'gf-intelligence',
 			// Main plugin file
 			'plugin_file' => 'gf-intel.php', // Main plugin file
 			// The server path to the plugin files directory

@@ -133,63 +133,51 @@ class GFIntelAddOn extends GFAddOn {
 
 		wp_enqueue_style('intel-gf-settings', $this->url . 'css/gf-intel-gf-settings.css');
 
-		$items = array();
+		$screen_vars = array(
 
-		$items[] = '<div class="wrap">';
-		$items[] = '<h1>' . esc_html__( 'Intelligence Settings', $this->plugin_un ) . '</h1>';
-		$items[] = '</div>';
-
-		$connect_desc = __('Not connected.', $this->plugin_un);
-		$connect_desc .= ' ' . sprintf(
-				__( ' %sSetup Intelligence%s', $this->plugin_un ),
-				'<a href="/wp-admin/admin.php?page=intel_admin&plugin=' . $this->plugin_un . '&q=admin/config/intel/settings/setup/' . $this->plugin_un . '" class="button">', '</a>'
-			);
-		if($this->is_intel_installed()) {
-			$connect_desc = __('Connected');
+		);
+		if (!$this->is_intel_installed('min')) {
+			require_once( $this->dir . 'gf-intel.setup.php' );
+			$screen_vars['content'] = gf_intel_setup()->get_plugin_setup_notice(array('inline' => 1));
+			print intel_setup_theme('setup_screen', $screen_vars);
+			return;
 		}
+
+		$items = array();
 
 		$items[] = '<table class="form-table">';
 		$items[] = '<tbody>';
 		$items[] = '<tr>';
 		$items[] = '<th>' . esc_html__( 'Intelligence API', $this->plugin_un ) . '</th>';
-		$items[] = '<td>' . $connect_desc . '</td>';
+		$items[] = '<td>' . __('Connected') . '</td>';
 		$items[] = '</tr>';
 
+		$eventgoal_options = intel_get_form_submission_eventgoal_options();
+		$default_name = get_option('intel_form_track_submission_default', 'form_submission');
+		$value = !empty($eventgoal_options[$default_name]) ? $eventgoal_options[$default_name] : Intel_Df::t('(not set)');
+		$l_options = Intel_Df::l_options_add_destination('admin.php?page=gf_settings&subview=gf_intel');
+		$l_options['attributes'] = array(
+			'class' => array('button'),
+		);
+		$value .= ' ' . Intel_Df::l(esc_html__('Change', $this->plugin_un), 'admin/config/intel/settings/form/default_tracking', $l_options);
+		$items[] = '<tr>';
+		$items[] = '<th>' . esc_html__( 'Default submission event/goal', $this->plugin_un ) . '</th>';
+		$items[] = '<td>' . $value . '</td>';
+		$items[] = '</tr>';
 
-		if ($this->is_intel_installed()) {
-			$eventgoal_options = intel_get_form_submission_eventgoal_options();
-			$default_name = get_option('intel_form_track_submission_default', 'form_submission');
-			$value = !empty($eventgoal_options[$default_name]) ? $eventgoal_options[$default_name] : Intel_Df::t('(not set)');
-			$l_options = Intel_Df::l_options_add_destination('wp-admin/admin.php?page=gf_settings&subview=gf_intel');
-			$l_options['attributes'] = array(
-				'class' => array('button'),
-			);
-			$value .= ' ' . Intel_Df::l(esc_html__('Change', $this->plugin_un), 'admin/config/intel/settings/form/default_tracking', $l_options);
-			$items[] = '<tr>';
-			$items[] = '<th>' . esc_html__( 'Default submission event/goal', $this->plugin_un ) . '</th>';
-			$items[] = '<td>' . $value . '</td>';
-			$items[] = '</tr>';
+		$default_value = get_option('intel_form_track_submission_value_default', '');
+		$items[] = '<tr>';
+		$items[] = '<th>' . esc_html__( 'Default submission value', $this->plugin_un ) . '</th>';
+		$items[] = '<td>' . (!empty($default_value) ? $default_value : Intel_Df::t('(default)')) . '</td>';
+		$items[] = '</tr>';
 
-			$default_value = get_option('intel_form_track_submission_value_default', '');
-			$items[] = '<tr>';
-			$items[] = '<th>' . esc_html__( 'Default submission value', $this->plugin_un ) . '</th>';
-			$items[] = '<td>' . (!empty($default_value) ? $default_value : Intel_Df::t('(default)')) . '</td>';
-			$items[] = '</tr>';
-		}
 		$items[] = '</tbody>';
 		$items[] = '</table>';
 
-		$output = implode("\n", $items);
+		$screen_vars['content'] = implode("\n", $items);
+		$output = Intel_Df::theme('wp_screen', $screen_vars);
 
-		return array(
-			array(
-				'description' => '<p>' . $output . '</p>',
-				'fields'      => array(
-
-				),
-			),
-		);
-
+		echo $output;
 	}
 
 	public function hook_gform_entry_detail_content($form, $entry ) {

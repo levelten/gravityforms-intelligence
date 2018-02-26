@@ -4,7 +4,7 @@ Donate link: getlevelten.com/blog/tom
 Tags: analytics, form, google analytics, gravity forms, marketing, metrics, stats, tracking, web form
 Requires at least: 4.5
 Tested up to: 4.9.2
-Stable tag: 1.0.5
+Stable tag: 1.0.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -93,6 +93,12 @@ Embed Google Analytics tracking code if site does not already embed tracking cod
 = 1.0.2 =
 * Support for intel_system API
 * Support for intel_form_type API
+
+= 1.0.5 =
+* Added form testing/demo
+
+= 1.0.6 =
+* Support php file extension migration
 
 == Upgrade Notice ==
 

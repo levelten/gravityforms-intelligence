@@ -1,6 +1,6 @@
 <?php
 /*
-* Gravity Forms Intelligence bootstrap file
+* Gravity Forms Google Analytics Intelligence bootstrap file
 *
 * This file is read by WordPress to generate the plugin information in the plugin
 * admin area. This file also includes all of the dependencies used by the plugin,
@@ -12,10 +12,10 @@
 * @package           Intelligence
 *
 * @wordpress-plugin
-* Plugin Name:       Gravity Forms Intelligence
+* Plugin Name:       Gravity Forms Google Analytics Intelligence
 * Plugin URI:        https://wordpress.org/plugins/gf-intelligence
 * Description:       Integrates Intelligence with Gravity Forms enabling easy Google Analytics goal tracking and visitor intelligence gathering.
-* Version:           1.0.6
+* Version:           1.0.7
 * Author:            LevelTen
 * Author URI:        https://intelligencewp.com
 * License:           GPL-2.0+
@@ -30,7 +30,7 @@ if ( ! defined( 'WPINC' ) ) {
   die;
 }
 
-define('GF_INTEL_VER', '1.0.6');
+define('GF_INTEL_VER', '1.0.7');
 
 define( 'GF_INTEL_DIR', plugin_dir_path( __FILE__ ) );
 

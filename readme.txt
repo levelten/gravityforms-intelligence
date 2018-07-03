@@ -12,18 +12,19 @@ Automates Gravity Forms Google Analytics tracking and visitor intelligence gathe
 
 == Description ==
 
-### Best Gravity Forms Google Analytics Goal Tracking Plugin
+### Gravity Forms Google Analytics Goal Tracking Plugin
 
 Google Analytics goal tracking for Gravity Forms made easy. 
 
-If you want to do Google Analytics right, tracking form submission as conversion goals is a must. Tracking conversion goals is vital to truly understanding the value of your traffic sources, content and visitors. Yet less than one in ten sites implement this powerful feature.
+If you want to do Google Analytics right, tracking form submission as conversion goals is a must. Goal tracking is vital to truly understanding the value of your traffic sources, content and visitors. Yet less than one in ten sites implement this powerful feature.
 
 Why? Because it's a pain, particularly if you are not a techie or analytics guru. 
 
-We believe better data leads to better user experiences, content and marketing. We believe everybody should have the best data available. It was just a matter of making simpler.
+We believe better data leads to better user experiences, content and marketing. We believe everybody should have the best data available. It was just a matter of making it simpler.
 
 Introducing the Gravity Forms Google Analytics Intelligence plugin:
-https://www.youtube.com/watch?v=6vFl4hbPkfQ
+
+https://www.youtube.com/watch?v=rOh-MmjIbP8&rel=0
 
 #### Key Features
 
@@ -40,10 +41,10 @@ https://www.youtube.com/watch?v=6vFl4hbPkfQ
 
 Works as a standalone Google Analytics plugin or with other popular Google Analytics plugins including:
 
-- [Google Analytics Dashboard for WP](https://wordpress.org/plugins/google-analytics-dashboard-for-wp/) by Alin Marcu (recommended)
-- [Google Analytics by MonsterInsights](https://wordpress.org/plugins/google-analytics-for-wordpress/)
-- [Google Analytics](https://wordpress.org/plugins/googleanalytics/) by ShareThis
-- [DuracellTomi's Google Tag Manager for WordPress](https://wordpress.org/plugins/duracelltomi-google-tag-manager/)
+- [Google Analytics Dashboard for WP](https://wordpress.org/plugins/google-analytics-dashboard-for-wp) by Alin Marcu (recommended)
+- [Google Analytics by MonsterInsights](https://wordpress.org/plugins/google-analytics-for-wordpress)
+- [Google Analytics](https://wordpress.org/plugins/googleanalytics) by ShareThis
+- [DuracellTomi's Google Tag Manager for WordPress](https://wordpress.org/plugins/duracelltomi-google-tag-manager)
 
 #### Enhanced Google Analytics
 
@@ -75,7 +76,7 @@ To learn more about Intelligence for WordPress visit [intelligencewp.com](https:
 
 === Changing default tracking ===
 1. Go to 'Admin Menu > Forms > Settings'. Click the "Intelligence" tab. Next to the "Default submission event/goal" value, click the "Change" button.
-1. One the Default form tracking page, use the "Submission event/goal" dropdown to select an existing goal. If you want to create a new goal, click the "Add Goal" link.
+1. On the Default form tracking page, use the "Submission event/goal" dropdown to select an existing goal. If you want to create a new goal, click the "Add Goal" link.
 1. When done, click "Save"
 
 === Custom Form Tracking ===

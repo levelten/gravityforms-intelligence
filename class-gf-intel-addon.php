@@ -998,7 +998,7 @@ class GFIntelAddOn extends GFAddOn {
 	 * Implements hook_intel_form_type_FORM_TYPE_UN_form_data()
 	 */
 	function intel_form_type_form_info($data = NULL, $options = array()) {
-		$info = &Intel_Df::drupal_static( __FUNCTION__, array());
+		$info = &Intel_Df::drupal_static( __METHOD__, array());
 		if (!empty($info) && empty($options['refresh'])) {
 			return $info;
 		}

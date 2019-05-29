@@ -3,8 +3,8 @@ Contributors: tomdude
 Donate link: getlevelten.com/blog/tom
 Tags: analytics, form, google analytics, gravity forms, marketing, metrics, stats, tracking, web form
 Requires at least: 4.5
-Tested up to: 5.0
-Stable tag: 1.0.9-dev
+Tested up to: 5.2
+Stable tag: 1.0.10-dev
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -135,6 +135,9 @@ Embed Google Analytics tracking code if site does not already embed tracking cod
 
 = 1.0.8 =
 * WP 5.0 support
+
+= 1.0.9 =
+* WP 5.2 support
 
 == Upgrade Notice ==
 
